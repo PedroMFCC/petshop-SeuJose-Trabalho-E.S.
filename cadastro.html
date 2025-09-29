@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Cadastro de Cliente</title>
+    <link rel="stylesheet" href="loginsyle.css">
+</head>
+<body>
+    <div class="login-container">
+        <h2>Crie sua Conta</h2>
+        
+        <form id="cadastro-form">
+            <label for="nome">Nome Completo</label>
+            <input type="text" id="nome" name="nome" required>
+
+            <label for="email">E-mail</label>
+            <input type="text" id="email" name="email" required>
+
+            <label for="senha">Senha (mínimo 8 caracteres)</label>
+            <input type="password" id="senha" name="senha" required minlength="8">
+
+            <button type="submit">Cadastrar</button>
+            <p>Já tem uma conta? <a href="login.html">Faça Login</a></p>
+        </form>
+    </div>
+
+    <script src="cadastro.js"></script>
+</body>
+</html>

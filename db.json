@@ -1,0 +1,38 @@
+{
+  "usuarios": [
+    {
+      "id": 1,
+      "email": "admin",
+      "senha": "admin",
+      "role": "admin"
+    },
+    {
+      "id": 2,
+      "email": "user@gmail.com",
+      "senha": "25n23sBzPWSPf2c",
+      "role": "cliente"
+    }
+  ],
+  "produtos": [
+    {
+      "id": 1,
+      "nome": "Ração para Cães Filhotes",
+      "preco": 59.9
+    },
+    {
+      "id": 2,
+      "nome": "Arranhador de Gato",
+      "preco": 110
+    },
+    {
+      "id": 3,
+      "nome": "Coleira Peitoral",
+      "preco": 35.5
+    },
+    {
+      "id": 4,
+      "nome": "bosta",
+      "preco": 12.5
+    }
+  ]
+}

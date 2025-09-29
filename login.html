@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Tela de Login</title>
+    <link rel="stylesheet" href="loginsyle.css">
+    <script src="java.js"></script>
+</head>
+<body>
+    <div class="login-container">
+        <h2>Login</h2>
+        
+        <form>
+            <center><img src="images/logo.png" alt="Logo" class="logo" width="300" height="300"></center>
+            <label for="email">E-mail</label>
+            <input type="text" id="email" name="email" required>
+
+            <label for="senha">Senha</label>
+            <input type="password" id="senha" name="senha" required>
+
+           <button type="button" onclick="fazerLogin()">Entrar</button>
+            <p>Não tem uma conta? <a href="cadastro.html">Cadastre-se</a></p>
+            <p><a href="esqueci-senha.html">Esqueceu a senha?</a></p>
+        </form>
+    </div>
+</body>
+</html>

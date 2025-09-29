@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Painel do Administrador</title>
+     <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        #lista-produtos { margin-top: 20px; }
+        .produto { border: 1px solid #ccc; padding: 10px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
+        .produto button { background-color: #ff4d4d; color: white; border: none; padding: 5px 10px; cursor: pointer; }
+        #form-adicionar { margin-top: 30px; padding: 20px; border: 2px solid #1976d2; }
+    </style>
+</head>
+<body>
+    <h1>Painel do Administrador</h1>
+
+    <div id="gerenciamento-produtos">
+        <h2>Produtos Atuais</h2>
+        <div id="lista-produtos"></div>
+    </div>
+
+    <div id="form-adicionar">
+        <h2>Adicionar Novo Produto</h2>
+        <form id="novo-produto-form">
+            <label for="nome">Nome do Produto:</label>
+            <input type="text" id="nome" required>
+            <label for="preco">Preço:</label>
+            <input type="number" id="preco" step="0.01" required>
+            <button type="submit">Adicionar</button>
+        </form>
+    </div>
+
+    <script>
+        // Verificação simples para proteger a página
+        const usuario = JSON.parse(localStorage.getItem('usuarioLogado'));
+        if (!usuario || usuario.role !== 'admin') {
+            alert('Acesso negado.');
+            window.location.href = 'login.html';
+        }
+
+        async function carregarProdutos() {
+            const response = await fetch('/api/produtos');
+            const produtos = await response.json();
+            const container = document.getElementById('lista-produtos');
+            container.innerHTML = '';
+
+            produtos.forEach(produto => {
+                const produtoDiv = document.createElement('div');
+                produtoDiv.className = 'produto';
+                produtoDiv.innerHTML = `
+                    <span>${produto.nome} - R$ ${produto.preco.toFixed(2)}</span>
+                    <button onclick="excluirProduto(${produto.id})">Excluir</button>
+                `;
+                container.appendChild(produtoDiv);
+            });
+        }
+
+        async function excluirProduto(id) {
+            if (confirm('Tem certeza que deseja excluir este produto?')) {
+                await fetch(`/api/produtos/${id}`, { method: 'DELETE' });
+                carregarProdutos(); // Recarrega a lista
+            }
+        }
+
+        document.getElementById('novo-produto-form').addEventListener('submit', async function(event) {
+            event.preventDefault();
+            const nome = document.getElementById('nome').value;
+            const preco = document.getElementById('preco').value;
+
+            await fetch('/api/produtos', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ nome, preco })
+            });
+            
+            this.reset(); // Limpa o formulário
+            carregarProdutos(); // Recarrega a lista
+        });
+
+        // Carrega os produtos assim que a página é aberta
+        window.onload = carregarProdutos;
+    </script>
+</body>
+</html>
