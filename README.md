@@ -69,6 +69,6 @@ Antes de começar, você vai precisar ter as seguintes ferramentas instaladas em
 ## 👨‍💻 Membros do Grupo
 
 * PedroMFCC
-* Dakoel
-* [Adicionar nome do Colega 3]
-* [Adicionar nome do Colega 4]
+* Dak0el
+* Lucio
+* Heitor
