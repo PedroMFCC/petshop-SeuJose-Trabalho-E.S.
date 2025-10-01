@@ -13,6 +13,8 @@
     function setUsers(u){ localStorage.setItem('users', JSON.stringify(u)); }
     function getProducts(){ return JSON.parse(localStorage.getItem('products')) || []; }
     function setProducts(p){ localStorage.setItem('products', JSON.stringify(p)); }
+    function getCart(){ return JSON.parse(localStorage.getItem('cart')) || []; }
+    function setCart(c){ localStorage.setItem('cart', JSON.stringify(c)); }
     function getCurrentUser(){ return JSON.parse(localStorage.getItem('currentUser')) || null; }
     function setCurrentUser(u){ localStorage.setItem('currentUser', JSON.stringify(u)); }
     function clearCurrentUser(){ localStorage.removeItem('currentUser'); }
@@ -74,7 +76,8 @@
             document.getElementById('logoutBtnLoja').classList.remove('hidden');
             if (user.isAdmin) document.getElementById('stockLinkLoja').classList.remove('hidden');
         }
-        renderProductsList();
+    renderProductsList();
+    renderCart();
     };
 
     function renderProductsList(){
@@ -85,10 +88,92 @@
         if (products.length === 0) { productsList.innerHTML = '<p>Nenhum produto disponível no momento.</p>'; return; }
         products.forEach(p => {
             const d = document.createElement('div'); d.className='product';
-            d.innerHTML = `<h4>${p.name}</h4><p>${p.description}</p><p><strong>Preço: R$ ${Number(p.price).toFixed(2)}</strong></p>`;
+            const buyDisabled = (p.quantity === 0) ? 'disabled' : '';
+            const qtyInfo = `<p><strong>Disponível: ${p.quantity}</strong></p>`;
+            d.innerHTML = `
+                <h4>${p.name}</h4>
+                <p>${p.description}</p>
+                <p><strong>Preço: R$ ${Number(p.price).toFixed(2)}</strong></p>
+                ${qtyInfo}
+                <div class="buy-controls">
+                    <input type="number" id="qtyInput-${p.id}" min="1" max="${p.quantity}" value="1" ${p.quantity===0? 'disabled':''}>
+                    <button id="btn-${p.id}" onclick="addToCart(${p.id})" ${buyDisabled}>Adicionar ao carrinho</button>
+                </div>
+            `;
             productsList.appendChild(d);
         });
     }
+
+    // Carrinho
+    window.addToCart = function(productId){
+        const input = document.getElementById('qtyInput-' + productId);
+        if (!input) return;
+        const qty = parseInt(input.value) || 0;
+        if (qty <= 0) { alert('Quantidade inválida'); return; }
+        const products = getProducts();
+        const prod = products.find(p => p.id === productId);
+        if (!prod) { alert('Produto não encontrado'); return; }
+        if (qty > prod.quantity) { alert('Quantidade solicitada maior que a disponível'); return; }
+
+        let cart = getCart();
+        const existing = cart.find(i => i.id === productId);
+        if (existing) {
+            if (existing.quantity + qty > prod.quantity) { alert('Carrinho excede estoque disponível'); return; }
+            existing.quantity += qty;
+        } else {
+            cart.push({ id: prod.id, name: prod.name, price: prod.price, quantity: qty });
+        }
+        setCart(cart);
+        renderCart();
+        alert('Adicionado ao carrinho');
+    };
+
+    function renderCart(){
+        const cartList = document.getElementById('cartList');
+        const cartTotal = document.getElementById('cartTotal');
+        if (!cartList || !cartTotal) return;
+        const cart = getCart();
+        cartList.innerHTML = '';
+        if (cart.length === 0) { cartList.innerHTML = '<p>Seu carrinho está vazio.</p>'; cartTotal.textContent = ''; return; }
+        let total = 0;
+        cart.forEach(item => {
+            const div = document.createElement('div'); div.className = 'product';
+            const subtotal = Number(item.price) * item.quantity;
+            total += subtotal;
+            div.innerHTML = `<h4>${item.name}</h4><p>Quantidade: ${item.quantity}</p><p>Subtotal: R$ ${subtotal.toFixed(2)}</p><button onclick="removeFromCart(${item.id})">Remover</button>`;
+            cartList.appendChild(div);
+        });
+        cartTotal.textContent = 'Total: R$ ' + total.toFixed(2);
+    }
+
+    window.removeFromCart = function(productId){
+        let cart = getCart();
+        cart = cart.filter(i => i.id !== productId);
+        setCart(cart);
+        renderCart();
+    };
+
+    window.checkout = function(){
+        const cart = getCart();
+        if (cart.length === 0) { alert('Carrinho vazio'); return; }
+        let products = getProducts();
+        // Verificar disponibilidade
+        for (const item of cart){
+            const prod = products.find(p => p.id === item.id);
+            if (!prod) { alert(`Produto ${item.name} não encontrado no estoque`); return; }
+            if (item.quantity > prod.quantity) { alert(`Estoque insuficiente para ${item.name}`); return; }
+        }
+        // Deduzir quantidades
+        for (const item of cart){
+            const prod = products.find(p => p.id === item.id);
+            prod.quantity -= item.quantity;
+        }
+        setProducts(products);
+        setCart([]);
+        renderProductsList();
+        renderCart();
+        alert('Compra finalizada com sucesso!');
+    };
 
     // Estoque (admin)
     window.estoque_init = function(){
@@ -103,18 +188,21 @@
     };
 
     window.addProductFromEstoque = function(){
-        const name = document.getElementById('productName').value.trim();
-        const description = document.getElementById('productDescription').value.trim();
-        const price = parseFloat(document.getElementById('productPrice').value);
+    const name = document.getElementById('productName').value.trim();
+    const description = document.getElementById('productDescription').value.trim();
+    const price = parseFloat(document.getElementById('productPrice').value);
+    const quantity = parseInt(document.getElementById('productQuantity') ? document.getElementById('productQuantity').value : 0);
         const msg = document.getElementById('productMessage'); msg.textContent = '';
-        if (!name || !description || !price) { msg.textContent = 'Preencha todos os campos corretamente'; return; }
-        if (isNaN(price) || price <= 0) { msg.textContent = 'Preço inválido'; return; }
+    if (!name || !description || !price || isNaN(quantity)) { msg.textContent = 'Preencha todos os campos corretamente'; return; }
+    if (isNaN(price) || price <= 0) { msg.textContent = 'Preço inválido'; return; }
+    if (isNaN(quantity) || quantity < 0) { msg.textContent = 'Quantidade inválida'; return; }
 
-        const products = getProducts();
-        const newProduct = { id: Date.now(), name, description, price };
+    const products = getProducts();
+    const newProduct = { id: Date.now(), name, description, price, quantity };
         products.push(newProduct); setProducts(products);
         msg.textContent = 'Produto adicionado com sucesso!'; msg.className='success';
         document.getElementById('productName').value=''; document.getElementById('productDescription').value=''; document.getElementById('productPrice').value='';
+    if (document.getElementById('productQuantity')) document.getElementById('productQuantity').value='';
         renderAdminProducts();
         setTimeout(()=>{ msg.textContent=''; msg.className='error'; }, 1500);
     };
@@ -135,7 +223,7 @@
         if (products.length === 0) { list.innerHTML = '<p>Nenhum produto cadastrado.</p>'; return; }
         products.forEach(p=>{
             const d = document.createElement('div'); d.className='product';
-            d.innerHTML = `<h4>${p.name}</h4><p>${p.description}</p><p><strong>Preço: R$ ${Number(p.price).toFixed(2)}</strong></p><button onclick="removeProduct(${p.id})">Remover</button>`;
+            d.innerHTML = `<h4>${p.name}</h4><p>${p.description}</p><p><strong>Preço: R$ ${Number(p.price).toFixed(2)}</strong></p><p><strong>Quantidade: ${p.quantity || 0}</strong></p><button onclick="removeProduct(${p.id})">Remover</button>`;
             list.appendChild(d);
         });
     }

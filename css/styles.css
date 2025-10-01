@@ -23,3 +23,8 @@ input, button { padding: 8px; margin: 6px 4px 6px 0; }
 .error { color: #c00 }
 .success { color: green }
 .right { float: right }
+
+.buy-controls input { width: 80px }
+.buy-controls button[disabled] { opacity: 0.5; cursor: not-allowed }
+
+.cart-summary { margin-top: 8px }
