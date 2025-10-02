@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agendamento de Serviços - Seu José</title>
+    <link rel="stylesheet" href="../css/styles.css">
+    <script defer src="../js/app.js"></script>
+</head>
+<body onload="agendamento_init()">
+    <header class="container">
+        <h1>Agendamento de Serviços</h1>
+        <nav>
+            <a href="../index.html">Início</a>
+            <a href="../Loja/loja.html">Loja</a>
+            <span id="userGreetingAgendamento" class="right"></span>
+            <button id="logoutBtnAgendamento" class="hidden" onclick="logout()">Sair</button>
+        </nav>
+    </header>
+
+    <main class="container">
+        <section>
+            <h3>Agende um Horário para seu Pet</h3>
+            <div>
+                <input type="text" id="petName" placeholder="Nome do Pet" required>
+                <select id="serviceType" required>
+                    <option value="" disabled selected>-- Escolha o Serviço --</option>
+                    <option value="Banho">Banho</option>
+                    <option value="Tosa">Tosa</option>
+                    <option value="Banho e Tosa">Banho e Tosa</option>
+                    <option value="Consulta Veterinária">Consulta Veterinária</option>
+                </select>
+                <input type="date" id="serviceDate" required>
+                <input type="time" id="serviceTime" required>
+                <textarea id="address" placeholder="Endereço para busca e entrega" style="width: 98%; margin-top: 8px;"></textarea>
+                <textarea id="observations" placeholder="Observações (ex: pet alérgico, arisco, etc.)" style="width: 98%; margin-top: 8px;"></textarea>
+                <button onclick="agendarServico()">Agendar</button>
+            </div>
+            <p id="agendamentoMessage" class="error"></p>
+        </section>
+
+        <section class="container">
+            <h3>Meus Agendamentos</h3>
+            <div id="agendamentosList">
+                <p>Você ainda não possui agendamentos.</p>
+            </div>
+        </section>
+    </main>
+</body>
+</html>

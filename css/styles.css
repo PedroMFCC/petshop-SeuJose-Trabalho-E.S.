@@ -28,3 +28,18 @@ input, button { padding: 8px; margin: 6px 4px 6px 0; }
 .buy-controls button[disabled] { opacity: 0.5; cursor: not-allowed }
 
 .cart-summary { margin-top: 8px }
+
+/* Estilos para o status do agendamento no painel de admin */
+.status {
+    padding: 3px 8px;
+    border-radius: 12px;
+    color: white;
+    font-size: 0.9em;
+    margin-right: 10px;
+}
+.status-pendente {
+    background-color: #f0ad4e; /* Laranja */
+}
+.status-concluido {
+    background-color: #5cb85c; /* Verde */
+}
