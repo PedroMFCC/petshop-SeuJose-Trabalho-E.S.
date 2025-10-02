@@ -690,3 +690,18 @@
       font-size: 1rem;
     }
   }
+
+  /* Estilos para o status do agendamento no painel de admin */
+.status {
+  padding: 3px 8px;
+  border-radius: 12px;
+  color: white;
+  font-size: 0.9em;
+  margin-right: 10px;
+}
+.status-pendente {
+  background-color: #f0ad4e; /* Laranja */
+}
+.status-concluido {
+  background-color: #5cb85c; /* Verde */
+}
