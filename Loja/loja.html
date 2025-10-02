@@ -8,26 +8,47 @@
     <script defer src="../js/app.js"></script>
 </head>
 <body onload="loja_init()">
-    <header class="container">
-        <h1>Loja</h1>
-        <nav>
-            <a href="../index.html">Início</a>
-            <a id="stockLinkLoja" href="estoque.html" class="hidden">Estoque</a>
-            <a href="../Agendamento/agendamento.html">Agendamento</a>
-            <span id="userGreetingLoja" class="right"></span>
-            <button id="logoutBtnLoja" class="hidden" onclick="logout()">Sair</button>
-        </nav>
+    <header>
+        <div class="header-container">
+            <a href="../index.html" class="logo">
+                <span class="logo-icon">🐾</span>
+                Seu José
+            </a>
+            <nav>
+                <a href="loja.html" class="active">Loja</a>
+                <a href="../LoginCadastro/login.html">Login</a>
+                <a href="../LoginCadastro/cadastro.html">Cadastro</a>
+                <a id="stockLinkLoja" href="estoque.html" class="hidden">Estoque</a>
+            </nav>
+            <div class="user-info">
+                <span id="userGreetingLoja" class="user-greeting"></span>
+                <button id="logoutBtnLoja" class="btn btn-outline btn-small hidden" onclick="logout()">Sair</button>
+            </div>
+        </div>
     </header>
 
     <main class="container">
-        <h2>Produtos Disponíveis</h2>
-        <div id="productsList"></div>
+        <div class="page-header">
+            <h1>Nossos Produtos</h1>
+            <p>Encontre tudo que seu pet precisa com a melhor qualidade</p>
+        </div>
+
+        <section>
+            <h2>Produtos Disponíveis</h2>
+            <div id="productsList" class="products-grid">
+                <!-- Produtos serão renderizados aqui pelo JavaScript -->
+            </div>
+        </section>
         
-        <section class="container">
-            <h3>Seu Carrinho</h3>
-            <div id="cartList"></div>
-            <p id="cartTotal"></p>
-            <button onclick="checkout()">Finalizar Compra</button>
+        <section class="cart-container">
+            <h2>Seu Carrinho</h2>
+            <div id="cartList">
+                <!-- Itens do carrinho serão renderizados aqui -->
+            </div>
+            <div id="cartTotal" class="cart-total"></div>
+            <div class="cart-actions">
+                <button onclick="checkout()" class="btn btn-primary">Finalizar Compra</button>
+            </div>
         </section>
     </main>
 </body>

@@ -60,7 +60,7 @@
     };
 
     // Logout global
-    window.logout = function(){ clearCurrentUser(); window.location.href = '../index.html'; };
+    window.logout = function(){ clearCurrentUser(); window.location.href = '/index.html'; };
 
     // Loja page
     window.loja_init = function(){
@@ -85,22 +85,33 @@
         if (!productsList) return;
         const products = getProducts();
         productsList.innerHTML = '';
-        if (products.length === 0) { productsList.innerHTML = '<p>Nenhum produto disponível no momento.</p>'; return; }
+        if (products.length === 0) { 
+            productsList.innerHTML = '<p class="text-center">Nenhum produto disponível no momento.</p>'; 
+            return; 
+        }
         products.forEach(p => {
-            const d = document.createElement('div'); d.className='product';
+            const productCard = document.createElement('div');
+            productCard.className = 'product-card';
+            
             const buyDisabled = (p.quantity === 0) ? 'disabled' : '';
-            const qtyInfo = `<p><strong>Disponível: ${p.quantity}</strong></p>`;
-            d.innerHTML = `
-                <h4>${p.name}</h4>
-                <p>${p.description}</p>
-                <p><strong>Preço: R$ ${Number(p.price).toFixed(2)}</strong></p>
-                ${qtyInfo}
-                <div class="buy-controls">
-                    <input type="number" id="qtyInput-${p.id}" min="1" max="${p.quantity}" value="1" ${p.quantity===0? 'disabled':''}>
-                    <button id="btn-${p.id}" onclick="addToCart(${p.id})" ${buyDisabled}>Adicionar ao carrinho</button>
+            const qtyInfo = p.quantity > 0 ? 
+                `<div class="product-quantity">Disponível: ${p.quantity}</div>` : 
+                `<div class="product-quantity" style="color: var(--error);">Fora de estoque</div>`;
+            
+            productCard.innerHTML = `
+                <div class="product-image">📦</div>
+                <div class="product-info">
+                    <h3 class="product-name">${p.name}</h3>
+                    <p class="product-description">${p.description}</p>
+                    <div class="product-price">R$ ${Number(p.price).toFixed(2)}</div>
+                    ${qtyInfo}
+                    <div class="product-actions">
+                        <input type="number" class="quantity-input" id="qtyInput-${p.id}" min="1" max="${p.quantity}" value="1" ${p.quantity===0? 'disabled':''}>
+                        <button class="btn btn-primary btn-small" id="btn-${p.id}" onclick="addToCart(${p.id})" ${buyDisabled}>Adicionar</button>
+                    </div>
                 </div>
             `;
-            productsList.appendChild(d);
+            productsList.appendChild(productCard);
         });
     }
 
@@ -129,22 +140,38 @@
     };
 
     function renderCart(){
-        const cartList = document.getElementById('cartList');
-        const cartTotal = document.getElementById('cartTotal');
-        if (!cartList || !cartTotal) return;
-        const cart = getCart();
-        cartList.innerHTML = '';
-        if (cart.length === 0) { cartList.innerHTML = '<p>Seu carrinho está vazio.</p>'; cartTotal.textContent = ''; return; }
-        let total = 0;
-        cart.forEach(item => {
-            const div = document.createElement('div'); div.className = 'product';
-            const subtotal = Number(item.price) * item.quantity;
-            total += subtotal;
-            div.innerHTML = `<h4>${item.name}</h4><p>Quantidade: ${item.quantity}</p><p>Subtotal: R$ ${subtotal.toFixed(2)}</p><button onclick="removeFromCart(${item.id})">Remover</button>`;
-            cartList.appendChild(div);
-        });
-        cartTotal.textContent = 'Total: R$ ' + total.toFixed(2);
+    const cartList = document.getElementById('cartList');
+    const cartTotal = document.getElementById('cartTotal');
+    if (!cartList || !cartTotal) return;
+    const cart = getCart();
+    cartList.innerHTML = '';
+    if (cart.length === 0) { 
+        cartList.innerHTML = '<p class="text-center">Seu carrinho está vazio.</p>'; 
+        cartTotal.textContent = ''; 
+        return; 
     }
+    let total = 0;
+    cart.forEach(item => {
+        const cartItem = document.createElement('div');
+        cartItem.className = 'cart-item';
+        const subtotal = Number(item.price) * item.quantity;
+        total += subtotal;
+        cartItem.innerHTML = `
+            <div class="cart-item-info">
+                <h4>${item.name}</h4>
+                <div class="cart-item-details">
+                    Quantidade: ${item.quantity} | Preço unitário: R$ ${Number(item.price).toFixed(2)}
+                </div>
+            </div>
+            <div class="cart-item-actions">
+                <div>Subtotal: R$ ${subtotal.toFixed(2)}</div>
+                <button class="btn btn-outline btn-small" onclick="removeFromCart(${item.id})">Remover</button>
+            </div>
+        `;
+        cartList.appendChild(cartItem);
+    });
+    cartTotal.textContent = 'Total: R$ ' + total.toFixed(2);
+}
 
     window.removeFromCart = function(productId){
         let cart = getCart();
@@ -220,12 +247,59 @@
         if (!list) return;
         const products = getProducts();
         list.innerHTML = '';
-        if (products.length === 0) { list.innerHTML = '<p>Nenhum produto cadastrado.</p>'; return; }
-        products.forEach(p=>{
-            const d = document.createElement('div'); d.className='product';
-            d.innerHTML = `<h4>${p.name}</h4><p>${p.description}</p><p><strong>Preço: R$ ${Number(p.price).toFixed(2)}</strong></p><p><strong>Quantidade: ${p.quantity || 0}</strong></p><button onclick="removeProduct(${p.id})">Remover</button>`;
-            list.appendChild(d);
+        
+        if (products.length === 0) { 
+            list.innerHTML = `
+                <div class="empty-state">
+                    <div class="icon">📦</div>
+                    <h3>Nenhum produto cadastrado</h3>
+                    <p>Adicione produtos usando o formulário ao lado</p>
+                </div>
+            `; 
+            return; 
+        }
+        
+        // Criar container grid para os produtos
+        const productsGrid = document.createElement('div');
+        productsGrid.className = 'admin-products-grid';
+        list.appendChild(productsGrid);
+        
+        products.forEach(p => {
+            const productCard = document.createElement('div');
+            productCard.className = 'admin-product-card';
+            
+            const quantityClass = p.quantity > 0 ? 'quantity-in-stock' : 'quantity-out-of-stock';
+            const quantityText = p.quantity > 0 ? `Em estoque: ${p.quantity}` : 'Fora de estoque';
+            
+            productCard.innerHTML = `
+                <h4>${p.name}</h4>
+                <p>${p.description}</p>
+                <div class="admin-product-price">R$ ${Number(p.price).toFixed(2)}</div>
+                <div class="admin-product-quantity ${quantityClass}">${quantityText}</div>
+                <div class="admin-product-actions">
+                    <button class="btn-remove" onclick="removeProduct(${p.id})">Remover</button>
+                </div>
+            `;
+            productsGrid.appendChild(productCard);
         });
+        
+        // Adicionar alertas se houver produtos com estoque baixo ou zerado
+        const lowStockProducts = products.filter(p => p.quantity > 0 && p.quantity <= 5);
+        const outOfStockProducts = products.filter(p => p.quantity === 0);
+        
+        if (outOfStockProducts.length > 0) {
+            const alert = document.createElement('div');
+            alert.className = 'stock-alert out';
+            alert.innerHTML = `⚠️ <strong>${outOfStockProducts.length}</strong> produto(s) fora de estoque`;
+            list.insertBefore(alert, productsGrid);
+        }
+        
+        if (lowStockProducts.length > 0) {
+            const alert = document.createElement('div');
+            alert.className = 'stock-alert low';
+            alert.innerHTML = `⚠️ <strong>${lowStockProducts.length}</strong> produto(s) com estoque baixo`;
+            list.insertBefore(alert, productsGrid);
+        }
     }
 
     // Script para index e exibição condicional do link de estoque
@@ -243,237 +317,5 @@
             if (user.isAdmin && stockLink) stockLink.classList.remove('hidden');
         }
     });
-
-    // ===============================================
-    // Funções para Agendamento de Serviços (VERSÃO ATUALIZADA)
-    // ===============================================
-
-    function getAgendamentos(){ return JSON.parse(localStorage.getItem('agendamentos')) || []; }
-    function setAgendamentos(a){ localStorage.setItem('agendamentos', JSON.stringify(a)); }
-
-    window.agendamento_init = function(){
-        const user = getCurrentUser();
-        // Restrição: Redireciona se não houver login
-        if (!user) {
-            alert('Você precisa estar logado para acessar esta página.');
-            window.location.href = '../LoginCadastro/login.html';
-            return;
-        }
-
-        document.getElementById('userGreetingAgendamento').textContent = user.username;
-        document.getElementById('logoutBtnAgendamento').classList.remove('hidden');
-        renderAgendamentos();
-    };
-
-    // DENTRO DE app.js, MODIFIQUE A FUNÇÃO agendarServico
-
-window.agendarServico = function(){
-    const user = getCurrentUser();
-    if (!user) return;
-
-    const petName = document.getElementById('petName').value.trim();
-    const serviceType = document.getElementById('serviceType').value;
-    const serviceDate = document.getElementById('serviceDate').value;
-    const serviceTime = document.getElementById('serviceTime').value;
-    const address = document.getElementById('address').value.trim();
-    const observations = document.getElementById('observations').value.trim();
-    
-    const msg = document.getElementById('agendamentoMessage');
-    msg.textContent = '';
-
-    if (!petName || !serviceType || !serviceDate || !serviceTime) {
-        msg.textContent = 'Por favor, preencha os campos de nome do pet, serviço, data e horário.';
-        return;
-    }
-
-    const agendamentos = getAgendamentos();
-    const newAgendamento = {
-        id: Date.now(),
-        owner: user.username,
-        petName,
-        service: serviceType,
-        date: serviceDate,
-        time: serviceTime,
-        address,
-        observations,
-        status: 'Pendente' // <-- NOVO CAMPO DE STATUS ADICIONADO
-    };
-
-    agendamentos.push(newAgendamento);
-    setAgendamentos(agendamentos);
-    
-    // O restante da função permanece igual...
-    msg.textContent = 'Serviço agendado com sucesso!';
-    msg.className = 'success';
-    document.getElementById('petName').value = '';
-    document.getElementById('serviceType').value = '';
-    document.getElementById('serviceDate').value = '';
-    document.getElementById('serviceTime').value = '';
-    document.getElementById('address').value = '';
-    document.getElementById('observations').value = '';
-    renderAgendamentos();
-    setTimeout(() => {
-        msg.textContent = '';
-        msg.className = 'error';
-    }, 2500);
-};
-
-    function renderAgendamentos(){
-        const user = getCurrentUser();
-        if (!user) return;
-
-        const list = document.getElementById('agendamentosList');
-        const allAgendamentos = getAgendamentos();
-        const userAgendamentos = allAgendamentos.filter(a => a.owner === user.username);
-
-        list.innerHTML = '';
-        if (userAgendamentos.length === 0) {
-            list.innerHTML = '<p>Você ainda não possui agendamentos.</p>';
-            return;
-        }
-
-        userAgendamentos.forEach(a => {
-            const dataFormatada = new Date(`${a.date}T${a.time}`).toLocaleDateString('pt-BR', {
-                day: '2-digit', month: '2-digit', year: 'numeric'
-            });
-
-            // Formatação destacando os campos solicitados
-            const div = document.createElement('div');
-            div.className = 'product'; // Reutilizando estilo
-            div.innerHTML = `
-                <h4>Serviço Agendado: ${dataFormatada} às ${a.time}</h4>
-                <p><strong>Dono:</strong> ${a.owner}</p>
-                <p><strong>Pet:</strong> ${a.petName}</p>
-                <p><strong>Serviço:</strong> ${a.service}</p>
-                <p><strong>Endereço:</strong> ${a.address || 'Não informado'}</p>
-                <p><strong>Observações:</strong> ${a.observations || 'Nenhuma'}</p>
-                <button onclick="cancelarAgendamento(${a.id})" style="margin-top: 10px;">Cancelar</button>
-            `;
-            list.appendChild(div);
-        });
-    }
-
-    window.cancelarAgendamento = function(agendamentoId){
-        if (!confirm('Tem certeza que deseja cancelar este agendamento?')) return;
-
-        let agendamentos = getAgendamentos();
-        agendamentos = agendamentos.filter(a => a.id !== agendamentoId);
-        setAgendamentos(agendamentos);
-        renderAgendamentos();
-    };
-
-    // ===============================================
-// Funções do Painel de Agendamentos (Admin)
-// ===============================================
-
-// Chamado pelo body da página agendamentos-admin.html
-window.agendamentosAdmin_init = function(){
-    ensureAdmin();
-    const user = getCurrentUser();
-    // Proteção: Apenas admins podem ver esta página
-    if (!user || !user.isAdmin) {
-        alert('Acesso restrito ao administrador.');
-        window.location.href = '/index.html';
-        return;
-    }
-
-    document.getElementById('userGreetingAdminAgendamentos').textContent = user.username + ' (admin)';
-    document.getElementById('logoutBtnAdminAgendamentos').classList.remove('hidden');
-    
-    renderAdminAgendamentos();
-};
-
-function renderAdminAgendamentos(){
-    const list = document.getElementById('adminAgendamentosList');
-    if (!list) return;
-
-    const allAgendamentos = getAgendamentos();
-    list.innerHTML = '';
-
-    if (allAgendamentos.length === 0) {
-        list.innerHTML = '<p>Nenhum agendamento encontrado.</p>';
-        return;
-    }
-
-    // Ordena para mostrar os pendentes primeiro
-    allAgendamentos.sort((a, b) => (a.status === 'Pendente' ? -1 : 1));
-
-    allAgendamentos.forEach(a => {
-        const dataFormatada = new Date(`${a.date}T${a.time}`).toLocaleDateString('pt-BR', {
-            day: '2-digit', month: '2-digit', year: 'numeric'
-        });
-        
-        const isPendente = a.status === 'Pendente';
-        const statusClass = isPendente ? 'status-pendente' : 'status-concluido';
-        const statusButtonText = isPendente ? 'Marcar como Concluído' : 'Marcar como Pendente';
-
-        const div = document.createElement('div');
-        div.className = 'product'; // Reutilizando estilo
-        div.innerHTML = `
-            <h4><span class="status ${statusClass}">${a.status}</span> Serviço: ${a.service}</h4>
-            <p><strong>Dono:</strong> ${a.owner}</p>
-            <p><strong>Pet:</strong> ${a.petName}</p>
-            <p><strong>Data:</strong> ${dataFormatada} às ${a.time}</p>
-            <p><strong>Endereço:</strong> ${a.address || 'Não informado'}</p>
-            <p><strong>Observações:</strong> ${a.observations || 'Nenhuma'}</p>
-            <div class="admin-controls" style="margin-top: 10px;">
-                <button onclick="toggleAgendamentoStatus(${a.id})">${statusButtonText}</button>
-                <button onclick="cancelarAgendamento(${a.id}, true)">Excluir Agendamento</button>
-            </div>
-        `;
-        list.appendChild(div);
-    });
-}
-
-// Nova função para alterar o status
-window.toggleAgendamentoStatus = function(agendamentoId) {
-    let agendamentos = getAgendamentos();
-    const agendamento = agendamentos.find(a => a.id === agendamentoId);
-    if (agendamento) {
-        agendamento.status = agendamento.status === 'Pendente' ? 'Concluído' : 'Pendente';
-        setAgendamentos(agendamentos);
-        renderAdminAgendamentos(); // Re-renderiza a lista do admin
-    }
-};
-
-// Modifique a função 'cancelarAgendamento' para aceitar um parâmetro de admin
-window.cancelarAgendamento = function(agendamentoId, isAdminAction = false){
-    if (!confirm('Tem certeza que deseja remover este agendamento?')) return;
-
-    let agendamentos = getAgendamentos();
-    agendamentos = agendamentos.filter(a => a.id !== agendamentoId);
-    setAgendamentos(agendamentos);
-
-    // Se a ação veio do painel do admin, recarrega a lista do admin.
-    // Senão, recarrega a lista do cliente.
-    if (isAdminAction) {
-        renderAdminAgendamentos();
-    } else {
-        renderAgendamentos();
-    }
-};
-
-// Finalmente, atualize o listener que mostra os links de admin
-window.addEventListener('DOMContentLoaded', ()=>{
-    ensureAdmin();
-    const user = getCurrentUser();
-    const stockLink = document.getElementById('stockLink');
-    const adminAgendamentosLink = document.getElementById('adminAgendamentosLink'); // <-- NOVO
-    const userGreeting = document.getElementById('userGreeting');
-    const logoutBtn = document.getElementById('logoutBtn');
-    
-    if (stockLink) stockLink.classList.add('hidden');
-    if (adminAgendamentosLink) adminAgendamentosLink.classList.add('hidden'); // <-- NOVO
-    if (logoutBtn) logoutBtn.classList.add('hidden');
-
-    if (user) {
-        if (userGreeting) userGreeting.textContent = user.username + (user.isAdmin? ' (admin)':'');
-        if (logoutBtn) logoutBtn.classList.remove('hidden');
-        if (user.isAdmin) {
-            if (stockLink) stockLink.classList.remove('hidden');
-            if (adminAgendamentosLink) adminAgendamentosLink.classList.remove('hidden'); // <-- NOVO
-        }
-    }
-});
 
 })();
