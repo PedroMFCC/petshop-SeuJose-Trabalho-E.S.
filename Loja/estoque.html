@@ -1,76 +1,267 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Estoque - Admin | Seu José</title>
-    <link rel="stylesheet" href="../css/styles.css">
+    <link rel="stylesheet" href="../css/styles.css" />
     <script defer src="../js/app.js"></script>
-</head>
-<body onload="estoque_init()">
+  </head>
+  <body onload="estoque_init()">
     <header>
-        <div class="header-container">
-            <a href="../index.html" class="logo">
-                <span class="logo-icon">🐾</span>
-                Seu José
-            </a>
-            <nav>
-                <a href="../index.html">Início</a>
-                <a href="loja.html">Loja</a>
-                <a href="estoque.html" class="active">Estoque</a>
-            </nav>
-            <div class="user-info">
-                <span id="userGreetingEstoque" class="user-greeting"></span>
-                <button id="logoutBtnEstoque" class="btn btn-outline btn-small" onclick="logout()">Sair</button>
-            </div>
+      <div class="header-container">
+        <a href="../index.html" class="logo">
+          <span class="logo-icon">🐾</span>
+          Seu José
+        </a>
+        <nav>
+          <a href="../index.html">Início</a>
+          <a href="loja.html">Loja</a>
+          <a href="estoque.html" class="active">Estoque</a>
+          <a href="../Agendamento/agendamento.html">Agendamento</a>
+          <a
+            id="adminAgendamentosLink"
+            href="../Agendamento/agendamentos-admin.html"
+            class="hidden"
+            >Agendamentos Admin</a
+          >
+        </nav>
+        <div class="user-info">
+          <span id="userGreetingEstoque" class="user-greeting"></span>
+          <button
+            id="logoutBtnEstoque"
+            class="btn btn-outline btn-small"
+            onclick="logout()"
+          >
+            Sair
+          </button>
         </div>
+      </div>
     </header>
 
     <main class="container">
-        <div class="page-header">
-            <h1>Gerenciar Estoque</h1>
-            <p>Adicione, edite ou remova produtos do catálogo</p>
-        </div>
+      <div class="page-header">
+        <h1>Gerenciar Estoque</h1>
+        <p>Adicione, edite ou remova produtos do catálogo</p>
+      </div>
 
-        <div class="estoque-container">
-            <!-- Formulário de adição -->
-            <section class="add-product-form">
-                <h3>Adicionar Novo Produto</h3>
-                <div id="productMessage" class="message message-error hidden"></div>
-                
-                <div class="form-group">
-                    <label for="productName" class="form-label">Nome do Produto</label>
-                    <input type="text" id="productName" class="form-input" placeholder="Ex: Coleira para Cães">
-                </div>
-                
-                <div class="form-group">
-                    <label for="productDescription" class="form-label">Descrição</label>
-                    <textarea id="productDescription" class="form-input" placeholder="Descreva o produto" rows="3"></textarea>
-                </div>
-                
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="productPrice" class="form-label">Preço (R$)</label>
-                        <input type="number" id="productPrice" class="form-input" placeholder="0.00" step="0.01" min="0">
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="productQuantity" class="form-label">Quantidade</label>
-                        <input type="number" id="productQuantity" class="form-input" placeholder="0" min="0" step="1">
-                    </div>
-                </div>
-                
-                <button onclick="addProductFromEstoque()" class="btn btn-primary" style="width: 100%;">Adicionar Produto</button>
-            </section>
+      <div class="estoque-container">
+        <!-- Formulário de adição -->
+        <section class="add-product-form">
+          <h3>Adicionar Novo Produto</h3>
+          <div id="productMessage" class="message message-error hidden"></div>
 
-            <!-- Lista de produtos -->
-            <section class="products-list-admin">
-                <h3>Produtos Cadastrados</h3>
-                <div id="adminProductsList">
-                    <!-- Produtos serão renderizados aqui -->
+          <div class="form-group">
+            <label for="productImage" class="form-label"
+              >Imagem do Produto</label
+            >
+            <div class="image-upload-container">
+              <input
+                type="file"
+                id="productImage"
+                class="image-upload-input"
+                accept="image/*"
+                onchange="previewImage(this)"
+              />
+              <div class="image-preview" id="imagePreview">
+                <div class="image-preview-placeholder">
+                  <span class="placeholder-icon">📷</span>
+                  <p>Clique para adicionar uma imagem</p>
                 </div>
-            </section>
-        </div>
+              </div>
+              <button
+                type="button"
+                class="btn btn-outline btn-small"
+                onclick="document.getElementById('productImage').click()"
+                style="width: 100%; margin-top: 10px"
+              >
+                Escolher Imagem
+              </button>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="productName" class="form-label">Nome do Produto</label>
+            <input
+              type="text"
+              id="productName"
+              class="form-input"
+              placeholder="Ex: Coleira para Cães"
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="productDescription" class="form-label">Descrição</label>
+            <textarea
+              id="productDescription"
+              class="form-input"
+              placeholder="Descreva o produto"
+              rows="3"
+            ></textarea>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="productPrice" class="form-label">Preço (R$)</label>
+              <input
+                type="number"
+                id="productPrice"
+                class="form-input"
+                placeholder="0.00"
+                step="0.01"
+                min="0"
+              />
+            </div>
+
+            <div class="form-group">
+              <label for="productQuantity" class="form-label">Quantidade</label>
+              <input
+                type="number"
+                id="productQuantity"
+                class="form-input"
+                placeholder="0"
+                min="0"
+                step="1"
+              />
+            </div>
+          </div>
+
+          <button
+            onclick="addProductFromEstoque()"
+            class="btn btn-primary"
+            style="width: 100%"
+          >
+            Adicionar Produto
+          </button>
+        </section>
+
+        <!-- Lista de produtos -->
+        <section class="products-list-admin">
+          <h3>Produtos Cadastrados</h3>
+          <div id="adminProductsList">
+            <!-- Produtos serão renderizados aqui -->
+          </div>
+        </section>
+      </div>
     </main>
-</body>
+
+    <!-- Modal de Edição -->
+    <div id="editProductModal" class="modal">
+      <div class="modal-content" style="max-width: 600px">
+        <div class="modal-header">
+          <h3>✏️ Editar Produto</h3>
+          <button type="button" class="modal-close" onclick="closeEditModal()">
+            ×
+          </button>
+        </div>
+
+        <div class="modal-body">
+          <div
+            id="editProductMessage"
+            class="message message-error hidden"
+          ></div>
+
+          <div class="form-group">
+            <label for="editProductImage" class="form-label"
+              >Imagem do Produto</label
+            >
+            <div class="image-upload-container">
+              <input
+                type="file"
+                id="editProductImage"
+                class="image-upload-input"
+                accept="image/*"
+                onchange="previewEditImage(this)"
+              />
+              <div class="image-preview" id="editImagePreview">
+                <div class="image-preview-placeholder">
+                  <span class="placeholder-icon">📷</span>
+                  <p>Clique para alterar a imagem</p>
+                </div>
+              </div>
+              <button
+                type="button"
+                class="btn btn-outline btn-small"
+                onclick="document.getElementById('editProductImage').click()"
+                style="width: 100%; margin-top: 10px"
+              >
+                Alterar Imagem
+              </button>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="editProductName" class="form-label"
+              >Nome do Produto</label
+            >
+            <input
+              type="text"
+              id="editProductName"
+              class="form-input"
+              placeholder="Nome do produto"
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="editProductDescription" class="form-label"
+              >Descrição</label
+            >
+            <textarea
+              id="editProductDescription"
+              class="form-input"
+              placeholder="Descrição do produto"
+              rows="3"
+            ></textarea>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="editProductPrice" class="form-label"
+                >Preço (R$)</label
+              >
+              <input
+                type="number"
+                id="editProductPrice"
+                class="form-input"
+                placeholder="0.00"
+                step="0.01"
+                min="0"
+              />
+            </div>
+
+            <div class="form-group">
+              <label for="editProductQuantity" class="form-label"
+                >Quantidade</label
+              >
+              <input
+                type="number"
+                id="editProductQuantity"
+                class="form-input"
+                placeholder="0"
+                min="0"
+                step="1"
+              />
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button
+            type="button"
+            class="btn btn-outline"
+            onclick="closeEditModal()"
+          >
+            Cancelar
+          </button>
+          <button
+            type="button"
+            class="btn btn-primary"
+            onclick="updateProduct()"
+          >
+            Salvar Alterações
+          </button>
+        </div>
+      </div>
+    </div>
+  </body>
 </html>

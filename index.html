@@ -1,70 +1,255 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
-<head>
-	<meta charset="UTF-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>Seu José - Pet Shop</title>
-	<link rel="stylesheet" href="css/styles.css">
-	<script defer src="js/app.js"></script>
-</head>
-<body>
-	<header>
-		<div class="header-container">
-			<a href="index.html" class="logo">
-				<span class="logo-icon">🐾</span>
-				Seu José
-			</a>
-			<nav>
-				<a href="Loja/loja.html" class="active">Loja</a>
-				<a href="LoginCadastro/login.html">Login</a>
-				<a href="LoginCadastro/cadastro.html">Cadastro</a>
-				<a id="stockLink" href="Loja/estoque.html" class="hidden">Estoque</a>
-			</nav>
-			<div class="user-info">
-				<span id="userGreeting" class="user-greeting"></span>
-				<button id="logoutBtn" class="btn btn-outline btn-small hidden" onclick="logout()">Sair</button>
-			</div>
-		</div>
-	</header>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Seu José - Pet Shop</title>
+    <link rel="stylesheet" href="css/styles.css" />
+    <script defer src="js/app.js"></script>
+  </head>
+  <body>
+    <header>
+      <div class="header-container">
+        <a href="index.html" class="logo">
+          <span class="logo-icon">🐾</span>
+          Seu José
+        </a>
+        <nav>
+          <a href="Loja/loja.html" class="active">Loja</a>
+          <a href="LoginCadastro/login.html">Login</a>
+          <a href="LoginCadastro/cadastro.html">Cadastro</a>
+          <a href="Agendamento/agendamento.html">Agendamento</a>
+          <a id="stockLink" href="Loja/estoque.html" class="hidden">Estoque</a>
+          <a
+            id="adminAgendamentosLink"
+            href="Agendamento/agendamentos-admin.html"
+            class="hidden"
+            >Agendamentos Admin</a
+          >
+        </nav>
+        <div class="user-info">
+          <span id="userGreeting" class="user-greeting"></span>
+          <button
+            id="logoutBtn"
+            class="btn btn-outline btn-small hidden"
+            onclick="logout()"
+          >
+            Sair
+          </button>
+        </div>
+      </div>
+    </header>
 
-	<main class="container">
-		<section class="hero">
-			<h1>Bem-vindo ao Pet Shop Seu José</h1>
-			<p>Cuidado e carinho para seu melhor amigo! Encontre os melhores produtos para seu pet com preços especiais.</p>
-			<a href="Loja/loja.html" class="btn btn-secondary">Ver Produtos</a>
-		</section>
+    <main class="container">
+      <section class="hero">
+        <h1>Bem-vindo ao Pet Shop Seu José</h1>
+        <p>
+          Cuidado e carinho para seu melhor amigo! Encontre os melhores produtos
+          e serviços para cães e gatos.
+        </p>
+        <a href="Loja/loja.html" class="btn btn-secondary">Ver Produtos</a>
+      </section>
 
-		<section class="page-header">
-			<h2>Nossos Serviços</h2>
-			<p>Tudo que seu pet precisa em um só lugar</p>
-		</section>
+      <section class="page-header">
+        <h2>Nossos Serviços Especializados</h2>
+        <p>Cuidamos do seu pet com amor e profissionalismo</p>
+      </section>
 
-		<div class="features">
-			<div class="feature-card">
-				<div class="feature-icon">🛒</div>
-				<h3>Loja Completa</h3>
-				<p>Encontre rações, brinquedos, acessórios e muito mais para seu pet</p>
-			</div>
-			<div class="feature-card">
-				<div class="feature-icon">📦</div>
-				<h3>Controle de Estoque</h3>
-				<p>Administradores podem gerenciar produtos e quantidades disponíveis</p>
-			</div>
-			<div class="feature-card">
-				<div class="feature-icon">🔐</div>
-				<h3>Área do Cliente</h3>
-				<p>Faça login para acessar funcionalidades exclusivas e personalizadas</p>
-			</div>
-		</div>
+      <div class="features">
+        <div class="feature-card">
+          <div class="feature-image">
+            <img
+              src="Imagens/caes-gatos.jpg"
+              alt="Cães e Gatos"
+              style="
+                width: 100%;
+                height: 200px;
+                object-fit: cover;
+                border-radius: 8px;
+              "
+            />
+          </div>
+          <h3>Para Cães e Gatos</h3>
+          <p>
+            Atendimento especializado para seus amigos de quatro patas!
+            Oferecemos produtos e serviços específicos para as necessidades de
+            cães e gatos, desde filhotes até idosos.
+          </p>
+          <ul style="text-align: left; margin-top: 10px">
+            <li>Rações premium para todas as idades</li>
+            <li>Brinquedos e acessórios específicos</li>
+            <li>Produtos de higiene e beleza</li>
+            <li>Medicamentos e suplementos</li>
+          </ul>
+        </div>
 
-		<section class="text-center mt-40">
-			<h2>Pronto para começar?</h2>
-			<p>Explore nossa loja ou faça login para acessar todas as funcionalidades</p>
-			<div class="mt-20">
-				<a href="Loja/loja.html" class="btn btn-primary">Visitar Loja</a>
-				<a href="LoginCadastro/login.html" class="btn btn-outline" style="margin-left: 10px;">Fazer Login</a>
-			</div>
-		</section>
-	</main>
-</body>
+        <div class="feature-card">
+          <div class="feature-image">
+            <img
+              src="Imagens/veterinario.jpg"
+              alt="Serviços Veterinários"
+              style="
+                width: 100%;
+                height: 200px;
+                object-fit: cover;
+                border-radius: 8px;
+              "
+            />
+          </div>
+          <h3>Clínica Veterinária</h3>
+          <p>
+            Cuide da saúde do seu pet com nossa equipe especializada! Consultas,
+            vacinas, exames e tratamentos com profissionais qualificados.
+          </p>
+          <ul style="text-align: left; margin-top: 10px">
+            <li>Consultas de rotina e emergência</li>
+            <li>Vacinação e prevenção</li>
+            <li>Exames laboratoriais</li>
+            <li>Cirurgias e procedimentos</li>
+            <li>Atendimento 24h para emergências</li>
+          </ul>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-image">
+            <img
+              src="Imagens/taxi-shop.jpg"
+              alt="Táxi Dog e Banho/Tosa"
+              style="
+                width: 100%;
+                height: 200px;
+                object-fit: cover;
+                border-radius: 8px;
+              "
+            />
+          </div>
+          <h3>Táxi Shop & Spa Pet</h3>
+          <p>
+            Serviço completo de transporte e beleza para seu pet! Buscamos,
+            levamos e cuidamos da estética do seu amiguinho com todo conforto.
+          </p>
+          <ul style="text-align: left; margin-top: 10px">
+            <li>Táxi Shop: Busca e entrega em domicílio</li>
+            <li>Banho profissional com produtos hipoalergênicos</li>
+            <li>Tosa higiênica e estética</li>
+            <li>Hidratação e tratamentos estéticos</li>
+            <li>Limpeza de ouvidos e corte de unhas</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Seção de Horários e Localização -->
+      <section class="container">
+        <div class="info-grid">
+          <!-- Tabela de Horários -->
+          <div class="info-card">
+            <h2>Nossos Horários</h2>
+            <p>Confira os horários de funcionamento dos nossos serviços</p>
+
+            <div class="tabela-horarios">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Serviço</th>
+                    <th>Segunda a Sexta</th>
+                    <th>Sábado</th>
+                    <th>Domingo</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td><strong>Clínica Veterinária</strong></td>
+                    <td>08:00 - 18:00</td>
+                    <td>08:00 - 12:00</td>
+                    <td>Emergências 24h</td>
+                  </tr>
+                  <tr>
+                    <td><strong>Banho & Tosa</strong></td>
+                    <td>07:00 - 19:00</td>
+                    <td>07:00 - 17:00</td>
+                    <td>Fechado</td>
+                  </tr>
+                  <tr>
+                    <td><strong>Táxi Dog</strong></td>
+                    <td>06:00 - 20:00</td>
+                    <td>07:00 - 18:00</td>
+                    <td>08:00 - 12:00</td>
+                  </tr>
+                  <tr>
+                    <td><strong>Loja de Produtos</strong></td>
+                    <td>08:00 - 20:00</td>
+                    <td>08:00 - 18:00</td>
+                    <td>09:00 - 13:00</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <div class="horario-destaque">
+              <div class="destaque-item">
+                <span class="destaque-icon">🚨</span>
+                <div>
+                  <strong>Plantão 24h</strong>
+                  <p>Emergências veterinárias</p>
+                </div>
+              </div>
+              <div class="destaque-item">
+                <span class="destaque-icon">📞</span>
+                <div>
+                  <strong>(37) 9999-9999</strong>
+                  <p>WhatsApp disponível</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Mapa de Localização -->
+          <div class="info-card">
+            <h2>📍 Nossa Localização</h2>
+            <p>Estamos localizados no coração de Formiga-MG</p>
+
+            <div class="mapa-container">
+              <!-- Mapa do Google Maps -->
+              <iframe
+                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3750.137708743722!2d-45.432949!3d-20.464444!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMjDCsDI3JzUyLjAiUyA0NcKwMjUnNTguNiJX!5e0!3m2!1spt-BR!2sbr!4v1690000000000!5m2!1spt-BR!2sbr"
+                width="100%"
+                height="300"
+                style="border: 0; border-radius: 8px"
+                allowfullscreen=""
+                loading="lazy"
+                referrerpolicy="no-referrer-when-downgrade"
+              >
+              </iframe>
+            </div>
+
+            <div class="info-localizacao">
+              <div class="info-item">
+                <span class="info-icon">🏠</span>
+                <div>
+                  <strong>Endereço</strong>
+                  <p>
+                    Rua Principal, 123 - Centro<br />Formiga - MG, 35570-000
+                  </p>
+                </div>
+              </div>
+              <div class="info-item">
+                <span class="info-icon">⏰</span>
+                <div>
+                  <strong>Horário Comercial</strong>
+                  <p>Segunda a Sábado: 8h às 18h</p>
+                </div>
+              </div>
+              <div class="info-item">
+                <span class="info-icon">🚗</span>
+                <div>
+                  <strong>Estacionamento</strong>
+                  <p>Amplo estacionamento gratuito</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </body>
 </html>

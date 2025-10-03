@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Agendamento - Seu José</title>
+    <link rel="stylesheet" href="../css/styles.css" />
+    <script defer src="../js/app.js"></script>
+  </head>
+  <body onload="agendamento_init()">
+    <header>
+      <div class="header-container">
+        <a href="../index.html" class="logo">
+          <span class="logo-icon">🐾</span>
+          Seu José
+        </a>
+        <nav>
+          <a href="../index.html">Início</a>
+          <a href="../Loja/loja.html">Loja</a>
+          <a href="agendamento.html" class="active">Agendamento</a>
+          <a href="../LoginCadastro/login.html">Login</a>
+        </nav>
+        <div class="user-info">
+          <span id="userGreetingAgendamento" class="user-greeting"></span>
+          <button
+            id="logoutBtnAgendamento"
+            class="btn btn-outline btn-small hidden"
+            onclick="logout()"
+          >
+            Sair
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <main class="container">
+      <div class="page-header">
+        <h1>Agendamento de Serviços</h1>
+        <p>Agende os melhores cuidados para seu pet com toda comodidade</p>
+      </div>
+
+      <div class="agendamento-container">
+        <!-- Formulário de Agendamento -->
+        <section class="agendamento-form">
+          <h3>Novo Agendamento</h3>
+          <div
+            id="agendamentoMessage"
+            class="message message-error hidden"
+          ></div>
+
+          <div class="form-group">
+            <label for="petName" class="form-label">Nome do Pet</label>
+            <input
+              type="text"
+              id="petName"
+              class="form-input"
+              placeholder="Ex: Rex, Luna, Bob"
+              required
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="serviceType" class="form-label">Tipo de Serviço</label>
+            <select id="serviceType" class="form-input" required>
+              <option value="" disabled selected>
+                -- Selecione o serviço --
+              </option>
+              <option value="Banho">Banho</option>
+              <option value="Tosa">Tosa</option>
+              <option value="Banho e Tosa">Banho e Tosa</option>
+              <option value="Consulta Veterinária">Consulta Veterinária</option>
+              <option value="Vacinação">Vacinação</option>
+            </select>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="serviceDate" class="form-label">Data</label>
+              <input type="date" id="serviceDate" class="form-input" required />
+            </div>
+
+            <div class="form-group">
+              <label for="serviceTime" class="form-label">Horário</label>
+              <input type="time" id="serviceTime" class="form-input" required />
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="address" class="form-label"
+              >Endereço para Busca/Entrega</label
+            >
+            <textarea
+              id="address"
+              class="form-input"
+              placeholder="Informe o endereço completo para busca e entrega do seu pet"
+              rows="3"
+            ></textarea>
+          </div>
+
+          <div class="form-group">
+            <label for="observations" class="form-label">Observações</label>
+            <textarea
+              id="observations"
+              class="form-input"
+              placeholder="Informações importantes sobre seu pet (alergias, comportamento, medicamentos, etc.)"
+              rows="3"
+            ></textarea>
+          </div>
+
+          <button
+            onclick="agendarServico()"
+            class="btn btn-primary"
+            style="width: 100%"
+          >
+            Agendar Serviço
+          </button>
+        </section>
+
+        <!-- Lista de Agendamentos -->
+        <section class="agendamentos-list">
+          <h3>Meus Agendamentos</h3>
+          <div id="agendamentosList">
+            <!-- Agendamentos serão renderizados aqui -->
+          </div>
+        </section>
+      </div>
+    </main>
+  </body>
+</html>
