@@ -10,23 +10,30 @@
   <body>
     <header>
       <div class="header-container">
+        <!-- Login moved to the left with dropdown (cadastro as suboption) -->
+        <div class="login-left">
+          <a href="LoginCadastro/login.html" id="leftLoginLink" class="btn btn-outline btn-small">
+            Entrar ▾
+          </a>
+          <div id="leftLoginDropdown" class="login-dropdown hidden">
+            <a href="LoginCadastro/login.html">Login</a>
+            <a href="LoginCadastro/cadastro.html" id="leftCadastroLink">Cadastro</a>
+          </div>
+        </div>
+
         <a href="index.html" class="logo">
           <span class="logo-icon">🐾</span>
           Seu José
         </a>
+
         <nav>
           <a href="Loja/loja.html" class="active">Loja</a>
-          <a href="LoginCadastro/login.html">Login</a>
-          <a href="LoginCadastro/cadastro.html">Cadastro</a>
           <a href="Agendamento/agendamento.html">Agendamento</a>
           <a id="stockLink" href="Loja/estoque.html" class="hidden">Estoque</a>
-          <a
-            id="adminAgendamentosLink"
-            href="Agendamento/agendamentos-admin.html"
-            class="hidden"
-            >Agendamentos Admin</a
-          >
+          <a id="adminAgendamentosLink" href="Agendamento/agendamentos-admin.html" class="hidden">Agendamentos Admin</a>
+          <a id="hotelAdminLink" href="Agendamento/hotel-admin.html" class="hidden">Hotel (Pets)</a>
         </nav>
+
         <div class="user-info">
           <span id="userGreeting" class="user-greeting"></span>
           <button

@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Hotel - Pets Atuais | Seu José</title>
+    <link rel="stylesheet" href="../css/styles.css" />
+    <script defer src="../js/app.js"></script>
+  </head>
+  <body onload="hotelAdmin_init()">
+    <header>
+      <div class="header-container">
+        <div class="login-left">
+          <a href="../LoginCadastro/login.html" id="leftLoginLinkHotelAdmin" class="btn btn-outline btn-small">
+            Entrar ▾
+          </a>
+          <div id="leftLoginDropdownHotelAdmin" class="login-dropdown hidden">
+            <a href="../LoginCadastro/login.html">Login</a>
+            <a href="../LoginCadastro/cadastro.html" id="leftCadastroLinkHotelAdmin">Cadastro</a>
+          </div>
+        </div>
+
+        <a href="../index.html" class="logo">
+          <span class="logo-icon">🐾</span>
+          Seu José
+        </a>
+
+        <nav>
+          <a href="../index.html">Início</a>
+          <a id="stockLink" href="../Loja/estoque.html" class="hidden">Estoque</a>
+          <a id="adminAgendamentosLink" href="agendamentos-admin.html" class="hidden">Agendamentos Admin</a>
+          <a id="hotelAdminLink" href="hotel-admin.html" class="hidden">Hotel (Pets)</a>
+        </nav>
+
+        <div class="user-info">
+          <span id="userGreetingHotelAdmin" class="user-greeting"></span>
+          <button id="logoutBtn" class="btn btn-outline btn-small" onclick="logout()">Sair</button>
+        </div>
+      </div>
+    </header>
+
+    <main class="container">
+      <div class="page-header">
+        <h1>Pets Hospedados Agora</h1>
+        <p>Lista dos pets hospedados no Hotel hoje</p>
+      </div>
+
+      <section class="agendamentos-list">
+        <h3>Pets no Hotel (hoje)</h3>
+        <div id="hotelPetsList">
+          <!-- Renderizado pelo JS -->
+        </div>
+      </section>
+    </main>
+  </body>
+</html>

@@ -10,6 +10,16 @@
   <body onload="agendamentosAdmin_init()">
     <header>
       <div class="header-container">
+        <div class="login-left">
+          <a href="../LoginCadastro/login.html" id="leftLoginLinkAdminAgendamentos" class="btn btn-outline btn-small">
+            Entrar ▾
+          </a>
+          <div id="leftLoginDropdownAdminAgendamentos" class="login-dropdown hidden">
+            <a href="../LoginCadastro/login.html">Login</a>
+            <a href="../LoginCadastro/cadastro.html" id="leftCadastroLinkAdminAgendamentos">Cadastro</a>
+          </div>
+        </div>
+
         <a href="../index.html" class="logo">
           <span class="logo-icon">🐾</span>
           Seu José
@@ -19,6 +29,7 @@
           <a href="../Loja/estoque.html">Estoque</a>
           <a href="agendamentos-admin.html" class="active">Agendamentos</a>
           <a href="../Loja/loja.html">Loja</a>
+          <a id="hotelAdminLink" href="hotel-admin.html" class="hidden">Hotel (Pets)</a>
         </nav>
         <div class="user-info">
           <span id="userGreetingAdminAgendamentos" class="user-greeting"></span>

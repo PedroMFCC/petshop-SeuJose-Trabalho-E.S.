@@ -10,6 +10,16 @@
   <body onload="agendamento_init()">
     <header>
       <div class="header-container">
+        <div class="login-left">
+          <a href="../LoginCadastro/login.html" id="leftLoginLinkAgendamento" class="btn btn-outline btn-small">
+            Entrar ▾
+          </a>
+          <div id="leftLoginDropdownAgendamento" class="login-dropdown hidden">
+            <a href="../LoginCadastro/login.html">Login</a>
+            <a href="../LoginCadastro/cadastro.html" id="leftCadastroLinkAgendamento">Cadastro</a>
+          </div>
+        </div>
+
         <a href="../index.html" class="logo">
           <span class="logo-icon">🐾</span>
           Seu José
@@ -18,7 +28,7 @@
           <a href="../index.html">Início</a>
           <a href="../Loja/loja.html">Loja</a>
           <a href="agendamento.html" class="active">Agendamento</a>
-          <a href="../LoginCadastro/login.html">Login</a>
+          <a id="hotelAdminLink" href="hotel-admin.html" class="hidden">Hotel (Pets)</a>
         </nav>
         <div class="user-info">
           <span id="userGreetingAgendamento" class="user-greeting"></span>
@@ -61,7 +71,7 @@
 
           <div class="form-group">
             <label for="serviceType" class="form-label">Tipo de Serviço</label>
-            <select id="serviceType" class="form-input" required>
+            <select id="serviceType" class="form-input" required title="Selecione o serviço desejado">
               <option value="" disabled selected>
                 -- Selecione o serviço --
               </option>
@@ -70,7 +80,12 @@
               <option value="Banho e Tosa">Banho e Tosa</option>
               <option value="Consulta Veterinária">Consulta Veterinária</option>
               <option value="Vacinação">Vacinação</option>
+              <option value="Hotel de Pet">Hotel de Pet</option>
             </select>
+          </div>
+
+          <div class="form-group" id="hotelNotice" style="display:none;">
+            <p class="message message-warning">Limite de vagas para Hotel: 10 pets por mesmo dia/horário.</p>
           </div>
 
           <div class="form-row">
@@ -79,9 +94,22 @@
               <input type="date" id="serviceDate" class="form-input" required />
             </div>
 
-            <div class="form-group">
+            <div class="form-group" id="serviceTimeGroup">
               <label for="serviceTime" class="form-label">Horário</label>
               <input type="time" id="serviceTime" class="form-input" required />
+            </div>
+          </div>
+
+          <!-- Campos específicos para Hotel -->
+      <div class="form-row" id="hotelTimeRow" style="display:none;" aria-hidden="true">
+            <div class="form-group">
+              <label for="entryTime" class="form-label">Horário de Entrada</label>
+        <input type="time" id="entryTime" class="form-input" title="Horário de entrada no hotel" />
+            </div>
+
+            <div class="form-group">
+              <label for="exitTime" class="form-label">Horário Pretendido de Saída</label>
+        <input type="time" id="exitTime" class="form-input" title="Horário previsto para saída do hotel" />
             </div>
           </div>
 

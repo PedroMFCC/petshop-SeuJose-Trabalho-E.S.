@@ -78,8 +78,8 @@
         users.push(newUser);
         setUsers(users);
 
-        msg.textContent = 'Usuário cadastrado com sucesso! Redirecionando...';
-        msg.className = 'message message-success';
+    msg.textContent = 'Usuário cadastrado com sucesso! Redirecionando...';
+    msg.className = 'message message-success';
         
         setCurrentUser(newUser);
         updateMenu();
@@ -92,7 +92,6 @@
         updateMenu();
         window.location.href = '../index.html'; 
     };
-
     // ===============================================
     // FUNÇÕES DA LOJA
     // ===============================================
@@ -106,6 +105,7 @@
 
     function renderProductsList(){
         const productsList = document.getElementById('productsList');
+    // render products list
         if (!productsList) return;
         const products = getProducts();
         productsList.innerHTML = '';
@@ -603,6 +603,54 @@
 
         updateMenu();
         renderAgendamentos();
+
+        const serviceSelect = document.getElementById('serviceType');
+        const hotelNotice = document.getElementById('hotelNotice');
+        const serviceTimeGroup = document.getElementById('serviceTimeGroup');
+        const serviceTimeInput = document.getElementById('serviceTime');
+        const hotelRow = document.getElementById('hotelTimeRow');
+
+        function applyServiceVisibility(value) {
+            const dateInput = document.getElementById('serviceDate');
+            if (value === 'Hotel de Pet') {
+                if (hotelNotice) hotelNotice.style.display = 'block';
+                if (hotelRow) {
+                    hotelRow.style.display = 'flex';
+                    hotelRow.setAttribute('aria-hidden', 'false');
+                }
+                if (serviceTimeGroup) {
+                    serviceTimeGroup.style.display = 'none';
+                    if (serviceTimeInput) serviceTimeInput.required = false;
+                }
+                if (dateInput) {
+                    const hoje = new Date();
+                    const amanha = new Date(hoje.getTime() + 24*60*60*1000);
+                    dateInput.min = hoje.toISOString().split('T')[0];
+                    dateInput.max = amanha.toISOString().split('T')[0];
+                }
+            } else {
+                if (hotelNotice) hotelNotice.style.display = 'none';
+                if (hotelRow) {
+                    hotelRow.style.display = 'none';
+                    hotelRow.setAttribute('aria-hidden', 'true');
+                }
+                if (serviceTimeGroup) {
+                    serviceTimeGroup.style.display = 'block';
+                    if (serviceTimeInput) serviceTimeInput.required = true;
+                }
+                if (dateInput) {
+                    dateInput.min = new Date().toISOString().split('T')[0];
+                    dateInput.removeAttribute('max');
+                }
+            }
+        }
+
+        if (serviceSelect) {
+            applyServiceVisibility(serviceSelect.value);
+            serviceSelect.addEventListener('change', function(){
+                applyServiceVisibility(this.value);
+            });
+        }
     };
 
     window.agendarServico = function(){
@@ -612,14 +660,15 @@
         const petName = document.getElementById('petName').value.trim();
         const serviceType = document.getElementById('serviceType').value;
         const serviceDate = document.getElementById('serviceDate').value;
-        const serviceTime = document.getElementById('serviceTime').value;
+    const serviceTimeEl = document.getElementById('serviceTime');
+    const serviceTime = serviceTimeEl ? serviceTimeEl.value : '';
         const address = document.getElementById('address').value.trim();
         const observations = document.getElementById('observations').value.trim();
         
         const msg = document.getElementById('agendamentoMessage');
         msg.textContent = '';
 
-        if (!petName || !serviceType || !serviceDate || !serviceTime) {
+        if (!petName || !serviceType || !serviceDate) {
             msg.textContent = 'Por favor, preencha os campos obrigatórios.';
             msg.className = 'message message-error';
             return;
@@ -633,13 +682,52 @@
         }
 
         const agendamentos = getAgendamentos();
+        const entryTime = document.getElementById('entryTime') ? document.getElementById('entryTime').value : '';
+        const exitTime = document.getElementById('exitTime') ? document.getElementById('exitTime').value : '';
+
+        // For Hotel require entry and exit times
+        if (serviceType === 'Hotel de Pet') {
+            if (!entryTime || !exitTime) {
+                msg.textContent = 'Informe horário de entrada e horário previsto de saída para o Hotel.';
+                msg.className = 'message message-error';
+                return;
+            }
+        } else {
+            if (!serviceTime) {
+                msg.textContent = 'Por favor, selecione o horário do serviço.';
+                msg.className = 'message message-error';
+                return;
+            }
+        }
+
+        // Hotel: only today or tomorrow allowed
+        if (serviceType === 'Hotel de Pet') {
+            const hoje = new Date().toISOString().split('T')[0];
+            const amanha = new Date(Date.now() + 24*60*60*1000).toISOString().split('T')[0];
+            if (serviceDate !== hoje && serviceDate !== amanha) {
+                msg.textContent = 'Hotel permite agendamento apenas para hoje ou amanhã.';
+                msg.className = 'message message-error';
+                return;
+            }
+            // use date + entryTime as slot
+            const slotKey = serviceDate + ' ' + entryTime;
+            const sameSlot = agendamentos.filter(a => a.service === 'Hotel de Pet' && ((a.date + ' ' + (a.entryTime || a.time)) === slotKey) && a.status !== 'Cancelado');
+            if (sameSlot.length >= 10) {
+                msg.textContent = 'Desculpe, não há vagas no Hotel para este dia/horário de entrada.';
+                msg.className = 'message message-error';
+                return;
+            }
+        }
+
         const newAgendamento = {
             id: Date.now(),
             owner: user.username,
             petName,
             service: serviceType,
             date: serviceDate,
-            time: serviceTime,
+            time: serviceType === 'Hotel de Pet' ? '' : serviceTime,
+            entryTime: serviceType === 'Hotel de Pet' ? entryTime : '',
+            exitTime: serviceType === 'Hotel de Pet' ? exitTime : '',
             address,
             observations,
             status: 'Pendente'
@@ -653,8 +741,10 @@
         
         document.getElementById('petName').value = '';
         document.getElementById('serviceType').value = '';
-        document.getElementById('serviceDate').value = '';
-        document.getElementById('serviceTime').value = '';
+    document.getElementById('serviceDate').value = '';
+    if (serviceTimeEl) serviceTimeEl.value = '';
+    if (document.getElementById('entryTime')) document.getElementById('entryTime').value = '';
+    if (document.getElementById('exitTime')) document.getElementById('exitTime').value = '';
         document.getElementById('address').value = '';
         document.getElementById('observations').value = '';
         
@@ -665,13 +755,57 @@
         }, 3000);
     };
 
+    // ===============================================
+    // HOTEL ADMIN VIEW
+    // ===============================================
+
+    window.hotelAdmin_init = function(){
+        const user = getCurrentUser();
+        if (!user || !user.isAdmin) {
+            alert('Acesso restrito ao administrador.');
+            window.location.href = '../index.html';
+            return;
+        }
+
+        updateMenu();
+        renderHotelPets();
+    };
+
+    function renderHotelPets(){
+        const list = document.getElementById('hotelPetsList');
+        if (!list) return;
+        const all = getAgendamentos();
+        const nowDate = new Date().toISOString().split('T')[0];
+        // Considerar hoje e status não cancelado
+        const petsToday = all.filter(a => a.service === 'Hotel de Pet' && a.date === nowDate && a.status !== 'Cancelado');
+        list.innerHTML = '';
+        if (petsToday.length === 0) {
+            list.innerHTML = '<p class="text-center">Nenhum pet hospedado hoje.</p>';
+            return;
+        }
+
+        petsToday.sort((a,b)=> new Date(a.date+'T'+(a.entryTime || a.time || '00:00')) - new Date(b.date+'T'+(b.entryTime || b.time || '00:00')));
+    petsToday.forEach(p => {
+            const div = document.createElement('div');
+            div.className = 'agendamento-card';
+            div.innerHTML = `
+        <h4>${p.petName} <small>(${p.owner})</small></h4>
+        <p><strong>Data:</strong> ${p.date}</p>
+        <p><strong>Entrada:</strong> ${p.entryTime || p.time} &nbsp; <strong>Saída:</strong> ${p.exitTime || '—'}</p>
+        <p><strong>Status:</strong> ${p.status}</p>
+            `;
+            list.appendChild(div);
+        });
+    }
+
     function renderAgendamentos(){
         const user = getCurrentUser();
         if (!user) return;
 
         const list = document.getElementById('agendamentosList');
-        const allAgendamentos = getAgendamentos();
-        const userAgendamentos = allAgendamentos.filter(a => a.owner === user.username);
+    const allAgendamentos = getAgendamentos();
+    // Exclude cancelled appointments from the user's view
+    const userAgendamentos = allAgendamentos.filter(a => a.owner === user.username && a.status !== 'Cancelado');
 
         list.innerHTML = '';
         if (userAgendamentos.length === 0) {
@@ -688,18 +822,35 @@
         userAgendamentos.sort((a, b) => new Date(b.date + 'T' + b.time) - new Date(a.date + 'T' + a.time));
 
         userAgendamentos.forEach(a => {
-            const dataFormatada = new Date(a.date + 'T' + a.time).toLocaleDateString('pt-BR', {
-                weekday: 'long',
-                day: '2-digit',
-                month: '2-digit',
-                year: 'numeric',
-                hour: '2-digit',
-                minute: '2-digit'
-            });
-
             const div = document.createElement('div');
             div.className = 'agendamento-card';
-            div.innerHTML = `
+            if (a.service === 'Hotel de Pet') {
+                const dateStr = new Date(a.date).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' });
+                div.innerHTML = `
+                <h4>
+                    <span class="status status-${a.status.toLowerCase()}">${a.status}</span>
+                    ${a.service}
+                </h4>
+                <p><strong>Pet:</strong> ${a.petName}</p>
+                <p><strong>Data:</strong> ${dateStr}</p>
+                <p><strong>Entrada:</strong> ${a.entryTime || '—'} &nbsp; <strong>Saída:</strong> ${a.exitTime || '—'}</p>
+                <p><strong>Endereço:</strong> ${a.address || 'Não informado'}</p>
+                <p><strong>Observações:</strong> ${a.observations || 'Nenhuma'}</p>
+                <div class="admin-controls">
+                    <button class="btn btn-outline btn-small" onclick="cancelarAgendamento(${a.id})">Cancelar</button>
+                </div>
+            `;
+            } else {
+                const dt = new Date(a.date + 'T' + (a.time || '00:00'));
+                const dataFormatada = dt.toLocaleDateString('pt-BR', {
+                    weekday: 'long',
+                    day: '2-digit',
+                    month: '2-digit',
+                    year: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+                div.innerHTML = `
                 <h4>
                     <span class="status status-${a.status.toLowerCase()}">${a.status}</span>
                     ${a.service}
@@ -712,6 +863,7 @@
                     <button class="btn btn-outline btn-small" onclick="cancelarAgendamento(${a.id})">Cancelar</button>
                 </div>
             `;
+            }
             list.appendChild(div);
         });
     }
@@ -835,41 +987,87 @@
 
     function updateMenu() {
         const user = getCurrentUser();
-        
-        const loginLinks = document.querySelectorAll('nav a[href*="login.html"]');
-        const cadastroLinks = document.querySelectorAll('nav a[href*="cadastro.html"]');
-        const userGreetings = document.querySelectorAll('.user-greeting');
-        const logoutBtns = document.querySelectorAll('#logoutBtn, #logoutBtnLoja, #logoutBtnEstoque, #logoutBtnAgendamento, #logoutBtnAdminAgendamentos');
-        const stockLinks = document.querySelectorAll('#stockLink, #stockLinkLoja');
-        const adminAgendamentosLinks = document.querySelectorAll('#adminAgendamentosLink');
+    const loginLinks = document.querySelectorAll('nav a[href*="login.html"]');
+    const cadastroLinks = document.querySelectorAll('nav a[href*="cadastro.html"]');
+    const userGreetings = document.querySelectorAll('.user-greeting');
+    const logoutBtns = document.querySelectorAll('#logoutBtn, #logoutBtnLoja, #logoutBtnEstoque, #logoutBtnAgendamento, #logoutBtnAdminAgendamentos');
+    const stockLinks = document.querySelectorAll('#stockLink, #stockLinkLoja');
+    const adminAgendamentosLinks = document.querySelectorAll('#adminAgendamentosLink');
+    const lojaLinks = document.querySelectorAll('nav a[href*="loja.html"]');
+    const agendamentoLinks = document.querySelectorAll('nav a[href*="agendamento.html"]');
+    const hotelLinks = document.querySelectorAll('#hotelAdminLink');
+    // Left dropdown elements
+    const leftLoginDropdowns = document.querySelectorAll('[id^="leftLoginDropdown"]');
+    const leftLoginButtons = document.querySelectorAll('[id^="leftLoginLink"]');
 
         if (user) {
+            // hide top-level login/cadastro when logged in
             loginLinks.forEach(link => link.classList.add('hidden'));
             cadastroLinks.forEach(link => link.classList.add('hidden'));
-            
+            // hide left login button once logged in
+            leftLoginButtons.forEach(btn => btn.classList.add('hidden'));
             userGreetings.forEach(greeting => {
                 greeting.textContent = user.username + (user.isAdmin ? ' (admin)' : '');
             });
-            
+
             logoutBtns.forEach(btn => btn.classList.remove('hidden'));
-            
+
             if (user.isAdmin) {
+                // Admin view: show admin links, hide public Loja/Agendamento
                 stockLinks.forEach(link => link.classList.remove('hidden'));
                 adminAgendamentosLinks.forEach(link => link.classList.remove('hidden'));
+                hotelLinks.forEach(link => link.classList.remove('hidden'));
+                lojaLinks.forEach(l => l.classList.add('hidden'));
+                agendamentoLinks.forEach(l => l.classList.add('hidden'));
+            } else {
+                // Regular user: hide admin links, ensure public links visible
+                stockLinks.forEach(link => link.classList.add('hidden'));
+                adminAgendamentosLinks.forEach(link => link.classList.add('hidden'));
+                hotelLinks.forEach(link => link.classList.add('hidden'));
+                lojaLinks.forEach(l => l.classList.remove('hidden'));
+                agendamentoLinks.forEach(l => l.classList.remove('hidden'));
             }
         } else {
+            // guest
             loginLinks.forEach(link => link.classList.remove('hidden'));
             cadastroLinks.forEach(link => link.classList.remove('hidden'));
-            
+            leftLoginButtons.forEach(btn => btn.classList.remove('hidden'));
             userGreetings.forEach(greeting => {
                 greeting.textContent = '';
             });
-            
+
             logoutBtns.forEach(btn => btn.classList.add('hidden'));
             stockLinks.forEach(link => link.classList.add('hidden'));
             adminAgendamentosLinks.forEach(link => link.classList.add('hidden'));
+            leftLoginDropdowns.forEach(d => d.classList.add('hidden'));
+            // guest sees public nav
+            lojaLinks.forEach(l => l.classList.remove('hidden'));
+            agendamentoLinks.forEach(l => l.classList.remove('hidden'));
+            hotelLinks.forEach(link => link.classList.add('hidden'));
         }
     }
+
+    // Toggle left dropdown menus: clicking the left login button toggles its sibling dropdown
+    document.addEventListener('click', function(e){
+        const target = e.target;
+        // if a left login button was clicked
+        if (target && target.id && target.id.startsWith('leftLoginLink')) {
+            const dropdownId = target.id.replace('leftLoginLink', 'leftLoginDropdown');
+            const dropdown = document.getElementById(dropdownId);
+            if (dropdown) {
+                dropdown.classList.toggle('hidden');
+            }
+            e.preventDefault();
+            return;
+        }
+
+        // click outside: close all left dropdowns
+        const isInsideLeft = target.closest && target.closest('.login-left');
+        if (!isInsideLeft) {
+            const leftLoginDropdowns = document.querySelectorAll('[id^="leftLoginDropdown"]');
+            leftLoginDropdowns.forEach(d => d.classList.add('hidden'));
+        }
+    });
 
     // ===============================================
     // INICIALIZAÇÃO

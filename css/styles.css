@@ -43,6 +43,49 @@
   --gradient-card: linear-gradient(135deg, var(--white) 0%, var(--accent) 100%);
 }
 
+/* Left login dropdown styling */
+.login-left {
+  display: inline-block;
+  margin-right: 12px;
+  position: relative;
+}
+.login-left .btn { cursor: pointer; }
+.login-dropdown {
+  position: absolute;
+  left: 0;
+  top: 38px;
+  background: var(--white);
+  border: 1px solid #eee;
+  box-shadow: var(--shadow);
+  border-radius: 8px;
+  min-width: 140px;
+  z-index: 60;
+  padding: 8px 0;
+}
+.login-dropdown a {
+  display: block;
+  padding: 8px 12px;
+  color: var(--dark);
+  text-decoration: none;
+}
+.login-dropdown a:hover { background: var(--gray-light); }
+
+/* Melhorias visuais para opções de serviço em agendamento */
+.form-input#serviceType {
+  padding: 12px;
+  border-radius: 8px;
+  border: 1px solid #e6e6e6;
+  background: linear-gradient(180deg, var(--white), var(--gray-bg));
+}
+.form-input#serviceType option { padding: 8px; }
+.message-warning { background: rgba(255, 152, 0, 0.12); color: var(--warning); padding: 10px; border-radius: 8px; border-left: 4px solid var(--warning); }
+
+/* Time input visual consistency */
+.form-input[type="time"] {
+  padding: 10px 12px;
+  border-radius: 8px;
+}
+
 * {
   margin: 0;
   padding: 0;

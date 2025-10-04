@@ -10,6 +10,16 @@
   <body>
     <header>
       <div class="header-container">
+        <div class="login-left">
+          <a href="login.html" id="leftLoginLinkLoginPage" class="btn btn-outline btn-small">
+            Entrar ▾
+          </a>
+          <div id="leftLoginDropdownLoginPage" class="login-dropdown hidden">
+            <a href="login.html">Login</a>
+            <a href="cadastro.html" id="leftCadastroLinkLoginPage">Cadastro</a>
+          </div>
+        </div>
+
         <a href="../index.html" class="logo">
           <span class="logo-icon">🐾</span>
           Seu José
@@ -17,8 +27,8 @@
         <nav>
           <a href="../Loja/loja.html">Loja</a>
           <a href="login.html" class="active">Login</a>
-          <a href="cadastro.html">Cadastro</a>
           <a href="../Agendamento/agendamento.html">Agendamento</a>
+          <a id="hotelAdminLink" href="../Agendamento/hotel-admin.html" class="hidden">Hotel (Pets)</a>
         </nav>
       </div>
     </header>
