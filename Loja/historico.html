@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Histórico de Compras - Seu José</title>
+    <link rel="stylesheet" href="../css/styles.css" />
+    <script defer src="../js/app.js"></script>
+  </head>
+  <body onload="historico_init()">
+    <header>
+      <div class="header-container">
+        <a href="../index.html" class="logo">
+          <span class="logo-icon">🐾</span>
+          Seu José
+        </a>
+      </div>
+    </header>
+
+    <main class="container">
+      <div class="page-header">
+        <h1>Histórico de Compras</h1>
+        <p>Resumo das suas compras realizadas</p>
+      </div>
+
+      <div style="text-align:center; margin-bottom:14px;">
+        <a class="btn btn-outline" href="loja.html">← Voltar para a Loja</a>
+      </div>
+
+      <section>
+        <div id="historicoList">
+          <!-- Orders will be rendered here -->
+        </div>
+      </section>
+    </main>
+  </body>
+</html>

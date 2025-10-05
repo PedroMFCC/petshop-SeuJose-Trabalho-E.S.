@@ -117,11 +117,16 @@
             <label for="address" class="form-label"
               >Endereço para Busca/Entrega</label
             >
+            <div id="taxiRow" class="form-row" style="align-items:center; gap:10px; margin-bottom:8px">
+              <input type="checkbox" id="needTaxi" />
+              <label for="needTaxi" style="margin:0">Necessita TaxiPet (Busca/Entrega)</label>
+            </div>
             <textarea
               id="address"
               class="form-input"
               placeholder="Informe o endereço completo para busca e entrega do seu pet"
               rows="3"
+              aria-required="false"
             ></textarea>
           </div>
 
