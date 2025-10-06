@@ -27,7 +27,6 @@
     function getConcluidosLog(){ return JSON.parse(localStorage.getItem('agendamentosConcluidos')) || []; }
     function setConcluidosLog(l){ localStorage.setItem('agendamentosConcluidos', JSON.stringify(l)); }
 
-    // Variável global para controlar o produto sendo editado
     let currentEditingProductId = null;
 
     // ===============================================
@@ -67,7 +66,6 @@
         const msg = document.getElementById('registerMessage');
         msg.textContent = '';
 
-        // Password policy: at least 5 chars, contain a letter and a number
         const passOk = password && password.length >= 5 && /[0-9]/.test(password) && /[A-Za-z]/.test(password);
         if (!username || !password) { 
             msg.textContent = 'Preencha todos os campos'; 
@@ -116,7 +114,7 @@
         renderCart();
     };
 
-    // Favoritos page init
+    // Favoritos 
     window.favoritos_init = function(){
         ensureAdmin();
         updateMenu();
@@ -160,7 +158,6 @@
 
     function renderProductsList(){
         const productsList = document.getElementById('productsList');
-    // render products list
         if (!productsList) return;
         const products = getProducts();
         productsList.innerHTML = '';
@@ -229,7 +226,6 @@
         alert('Adicionado ao carrinho');
     };
 
-    // Favorites
     window.toggleFavorite = function(productId){
         const user = getCurrentUser();
         if (!user) { alert('Faça login para favoritar produtos'); return; }
@@ -239,7 +235,6 @@
         fav[user.username] = Array.from(userFavs);
         setFavorites(fav);
         renderProductsList();
-        // update favoritos page if present
         if (typeof renderFavoritosList === 'function') {
             try { renderFavoritosList(); } catch(e) {}
         }
@@ -315,12 +310,10 @@
         }
 
         setProducts(products);
-        // save order BEFORE clearing cart items (store copy)
         const orderItems = cart.map(i => ({ id: i.id, name: i.name, price: i.price, quantity: i.quantity }));
         setCart([]);
         renderProductsList();
         renderCart();
-        // record order
         const orders = getOrders();
         const user = getCurrentUser();
         if (user) {
@@ -330,7 +323,6 @@
         alert('Compra finalizada com sucesso!');
     };
 
-    // Render order history modal (simple alert for now)
     window.showOrderHistory = function(){
         const user = getCurrentUser();
         if (!user) { alert('Faça login para ver seu histórico de compras'); return; }
@@ -345,7 +337,6 @@
         alert(text);
     };
 
-    // New page-based history view
     window.historico_init = function(){
         const user = getCurrentUser();
         if (!user) {
@@ -803,7 +794,6 @@
             });
         }
 
-        // Taxi checkbox: require address only when checked
         if (needTaxi && addressInput) {
             needTaxi.addEventListener('change', function(){
                 if (this.checked) {
@@ -846,19 +836,18 @@
         }
 
         const agendamentos = getAgendamentos();
-        // service duration map in minutes
+
         const serviceDurations = {
             'Banho': 60,
             'Tosa': 90,
             'Banho e Tosa': 120,
             'Consulta Veterinária': 30,
             'Vacinação': 15,
-            'Hotel de Pet': 0 // hotel handled differently
+            'Hotel de Pet': 0 
         };
         const entryTime = document.getElementById('entryTime') ? document.getElementById('entryTime').value : '';
         const exitTime = document.getElementById('exitTime') ? document.getElementById('exitTime').value : '';
 
-        // For Hotel require entry and exit times
         if (serviceType === 'Hotel de Pet') {
             if (!entryTime || !exitTime) {
                 msg.textContent = 'Informe horário de entrada e horário previsto de saída para o Hotel.';
@@ -873,7 +862,6 @@
             }
         }
 
-        // If TaxiPet is checked, require address
         const needTaxiChecked = document.getElementById('needTaxi') ? document.getElementById('needTaxi').checked : false;
         if (needTaxiChecked && !address) {
             msg.textContent = 'Quando solicitar TaxiPet, informe o endereço para busca/entrega.';
@@ -881,7 +869,6 @@
             return;
         }
 
-        // Hotel: only today or tomorrow allowed
         if (serviceType === 'Hotel de Pet') {
             const hoje = new Date().toISOString().split('T')[0];
             const amanha = new Date(Date.now() + 24*60*60*1000).toISOString().split('T')[0];
@@ -890,7 +877,7 @@
                 msg.className = 'message message-error';
                 return;
             }
-            // use date + entryTime as slot
+
             const slotKey = serviceDate + ' ' + entryTime;
             const sameSlot = agendamentos.filter(a => a.service === 'Hotel de Pet' && ((a.date + ' ' + (a.entryTime || a.time)) === slotKey) && a.status !== 'Cancelado');
             if (sameSlot.length >= 10) {
@@ -900,10 +887,8 @@
             }
         }
 
-        // Prevent overlapping bookings for same user based on serviceDurations
         if (serviceType !== 'Hotel de Pet') {
             const duration = serviceDurations[serviceType] || 30;
-            // compute start and end Date objects for new booking
             const start = new Date(serviceDate + 'T' + serviceTime);
             const end = new Date(start.getTime() + duration*60*1000);
             const userOwn = agendamentos.filter(a => a.owner === user.username && a.status !== 'Cancelado' && a.service !== 'Hotel de Pet');
@@ -911,7 +896,6 @@
                 const aStart = new Date(a.date + 'T' + (a.time || '00:00'));
                 const aDuration = serviceDurations[a.service] || 30;
                 const aEnd = new Date(aStart.getTime() + aDuration*60*1000);
-                // overlaps if start < aEnd && aStart < end
                 return (start < aEnd && aStart < end);
             });
             if (overlap) {
@@ -939,7 +923,6 @@
         agendamentos.push(newAgendamento);
         setAgendamentos(agendamentos);
         
-        // compute estimated completion time for non-hotel services
         let successMsg = 'Serviço agendado com sucesso!';
         if (serviceType !== 'Hotel de Pet') {
             const duration = serviceDurations[serviceType] || 30;
@@ -960,7 +943,6 @@
          document.getElementById('observations').value = '';
          
          renderAgendamentos();
-        // For non-hotel services show estimated completion for 30 seconds
         if (serviceType !== 'Hotel de Pet') {
             try{ showEstimatedCompletion(successMsg); } catch(e){
                 msg.textContent = successMsg;
@@ -969,22 +951,18 @@
                 setTimeout(()=>{ msg.classList.add('hidden'); msg.textContent = ''; }, 30000);
             }
         } else {
-            // keep short message for hotel bookings
             msg.textContent = successMsg;
             msg.className = 'message message-success';
             setTimeout(() => { msg.textContent = ''; msg.className = 'message message-error hidden'; }, 3000);
         }
      };
 
-    // Show estimated completion message for 30 seconds
     window.showEstimatedCompletion = function(message){
         const msgEl = document.getElementById('agendamentoMessage');
         if (!msgEl) return;
         msgEl.textContent = message;
         msgEl.className = 'message message-success';
-        // Ensure it's visible
         msgEl.classList.remove('hidden');
-        // Hide after 30 seconds (30000 ms)
         setTimeout(()=>{
             msgEl.classList.add('hidden');
             msgEl.textContent = '';
@@ -1012,7 +990,6 @@
         if (!list) return;
         const all = getAgendamentos();
         const nowDate = new Date().toISOString().split('T')[0];
-        // Considerar hoje e status não cancelado
         const petsToday = all.filter(a => a.service === 'Hotel de Pet' && a.date === nowDate && a.status !== 'Cancelado');
         list.innerHTML = '';
         if (petsToday.length === 0) {
@@ -1034,7 +1011,6 @@
         });
     }
 
-    // Render user agendamentos (show unread vet prescriptions even if concluded)
     function renderAgendamentos(){
 	const list = document.getElementById('agendamentosList');
 	if (!list) return;
@@ -1046,7 +1022,6 @@
 
 	const all = getAgendamentos();
 
-	// First, show unread veterinarian prescriptions (regardless of appointment status)
 	const unreadPrescriptions = all.filter(a => a.owner === user.username && a.vetResponse && !a.vetRead);
 
 	let html = '';
@@ -1063,7 +1038,6 @@
 		html += '</div>';
 	}
 
-	// Then show active (non-concluded, non-cancelled) appointments
 	const agendamentos = all.filter(a => a.owner === user.username && a.status !== 'Concluído' && a.status !== 'Cancelado');
 
 	if (agendamentos.length === 0 && unreadPrescriptions.length === 0) {
@@ -1078,7 +1052,6 @@
 			html += `<h4>${a.service} <span class="status ${a.status === 'Pendente' ? 'status-pendente' : (a.status === 'Concluído' ? 'status-concluido' : '')}">${a.status}</span></h4>`;
 			html += `<p><strong>Pet:</strong> ${a.petName} <br /><strong>Data:</strong> ${a.date} ${a.time || a.entryTime || ''}</p>`;
 			if (a.observations) html += `<p><strong>Observações:</strong> ${a.observations}</p>`;
-			// If there is a vetResponse but it's already read, it shouldn't appear; unread ones were handled above
 			html += '<div class="admin-controls">';
 			html += `<button class="btn btn-outline btn-small" onclick="cancelarAgendamento(${a.id})">Cancelar</button>`;
 			html += '</div>';
@@ -1089,12 +1062,10 @@
 	list.innerHTML = html;
 }
 
-// Allow user to mark veterinarian message as read: remove the message from the agendamento and update notifications
 window.markVetRead = function(agendamentoId){
 	const ags = getAgendamentos();
 	const idx = ags.findIndex(a => a.id === agendamentoId);
 	if (idx === -1) return;
-	// Clear the vetResponse and mark as read so notification disappears
 	ags[idx].vetResponse = null;
 	ags[idx].vetRead = true;
 	setAgendamentos(ags);
@@ -1102,44 +1073,39 @@ window.markVetRead = function(agendamentoId){
 	try { renderVetNotifications(); } catch(e){}
 };
 
-// Admin: mark an agendamento as concluído (moves it out of the main admin list into the Concluídos log)
 window.markAgendamentoConcluido = function(agendamentoId){
 	const ags = getAgendamentos();
 	const idx = ags.findIndex(a => a.id === agendamentoId);
 	if (idx === -1) return;
-	// set status
+
 	ags[idx].status = 'Concluído';
-	// Add to concluidos log (store a copy)
+
 	const log = getConcluidosLog();
 	const entry = Object.assign({}, ags[idx]);
 	entry.concludedAt = new Date().toISOString();
 	log.push(entry);
 	setConcluidosLog(log);
 	setAgendamentos(ags);
-	// Re-render admin and user views
+
 	try { renderAdminAgendamentos(); } catch(e){}
 	try { renderAgendamentos(); } catch(e){}
 	try { renderVetNotifications(); } catch(e){}
 };
 
-// Render admin agendamentos with two tabs: Ativos and Concluídos (no option to re-open concluded items)
 function renderAdminAgendamentos(){
 	const container = document.getElementById('adminAgendamentosList');
 	if (!container) return;
 	const ags = getAgendamentos();
-	// Show all agendamentos to admin regardless of owner
 	const active = ags.filter(a => a.status !== 'Concluído');
 	const completed = getConcluidosLog();
 
 	container.innerHTML = '';
 
-	// Tabs header
 	const tabs = document.createElement('div');
 	tabs.className = 'admin-tabs';
 	tabs.innerHTML = `<button id="tabActive" class="btn btn-outline btn-small">Ativos (${active.length})</button> <button id="tabCompleted" class="btn btn-outline btn-small">Concluídos (${completed.length})</button>`;
 	container.appendChild(tabs);
 
-	// Active list
 	const activeDiv = document.createElement('div');
 	activeDiv.id = 'adminActiveList';
 	activeDiv.style.marginTop = '12px';
@@ -1153,9 +1119,7 @@ function renderAdminAgendamentos(){
 			html += `<h4>${a.service} <small>(${a.owner})</small></h4>`;
 			html += `<p><strong>Pet:</strong> ${a.petName} <br /><strong>Data:</strong> ${a.date} ${a.time || a.entryTime || ''}</p>`;
 			if (a.observations) html += `<p><strong>Observações:</strong> ${a.observations}</p>`;
-			// show client comment if present
 			if (a.clientComment) html += `<p><strong>Comentário do cliente:</strong> ${a.clientComment}</p>`;
-			// Vet response textarea and controls
 			html += `<div style="margin-top:8px"><textarea id="vetResponse-${a.id}" rows="3" class="form-input" placeholder="Escreva a prescrição/veterinária aqui..."></textarea></div>`;
 			html += '<div class="admin-controls">';
 			html += `<button class="btn btn-primary btn-small" onclick="sendVetPrescription(${a.id})">Enviar Prescrição</button>`;
@@ -1167,7 +1131,6 @@ function renderAdminAgendamentos(){
 		activeDiv.innerHTML = html;
 	}
 
-	// Completed list (from log) - read-only, no reopen button
 	const completedDiv = document.createElement('div');
 	completedDiv.id = 'adminCompletedList';
 	completedDiv.style.display = 'none';
@@ -1192,7 +1155,6 @@ function renderAdminAgendamentos(){
 	container.appendChild(activeDiv);
 	container.appendChild(completedDiv);
 
-	// Tab switching handlers
 	const tabActive = document.getElementById('tabActive');
 	const tabCompleted = document.getElementById('tabCompleted');
 	tabActive.addEventListener('click', () => {
@@ -1221,7 +1183,6 @@ function renderAdminAgendamentos(){
         renderAdminAgendamentos();
     };
 
-    // Admin sends a prescription — reads textarea content and stores response with read flag
     window.sendVetPrescription = function(agendamentoId){
         const ags = getAgendamentos();
         const idx = ags.findIndex(a => a.id === agendamentoId);
@@ -1231,33 +1192,27 @@ function renderAdminAgendamentos(){
         const text = ta.value.trim();
         if (!text) return;
         ags[idx].vetResponse = text;
-        ags[idx].vetRead = false; // mark as unread for user
+        ags[idx].vetRead = false;
         setAgendamentos(ags);
-        // re-render admin list and notify
         try{ renderAdminAgendamentos(); } catch(e){}
         try{ renderVetNotifications(); } catch(e){}
     };
 
-    // User marks prescription as read
     window.markVetRead = function(agendamentoId){
         const ags = getAgendamentos();
         const idx = ags.findIndex(a => a.id === agendamentoId);
         if (idx === -1) return;
-        // Remove the vetResponse so it no longer shows to the user
         ags[idx].vetResponse = null;
         ags[idx].vetRead = true;
         setAgendamentos(ags);
-        // Re-render user list and notifications
         try { renderAgendamentos(); } catch(e){}
         try { renderVetNotifications(); } catch(e){}
     };
 
     window.replyVet = function(agendamentoId){
-        // keep compatibility: proxy to sendVetPrescription
         if (typeof sendVetPrescription === 'function') sendVetPrescription(agendamentoId);
     };
 
-    // Toggle agendamento status (simple toggle between 'Agendado' and 'Em Andamento')
     window.toggleAgendamentoStatus = function(agendamentoId){
         const ags = getAgendamentos();
         const idx = ags.findIndex(a => a.id === agendamentoId);
@@ -1269,7 +1224,6 @@ function renderAdminAgendamentos(){
         try{ renderAgendamentos(); } catch(e){}
     };
 
-    // Admin cancel/delete an agendamento
     window.cancelarAgendamentoAdmin = function(agendamentoId){
         let ags = getAgendamentos();
         ags = ags.filter(a => a.id !== agendamentoId);
@@ -1294,15 +1248,12 @@ function renderAdminAgendamentos(){
     const lojaLinks = document.querySelectorAll('nav a[href*="loja.html"]');
     const agendamentoLinks = document.querySelectorAll('nav a[href*="agendamento.html"]');
     const hotelLinks = document.querySelectorAll('#hotelAdminLink');
-    // Left dropdown elements
     const leftLoginDropdowns = document.querySelectorAll('[id^="leftLoginDropdown"]');
     const leftLoginButtons = document.querySelectorAll('[id^="leftLoginLink"]');
 
         if (user) {
-            // hide top-level login/cadastro when logged in
             loginLinks.forEach(link => link.classList.add('hidden'));
             cadastroLinks.forEach(link => link.classList.add('hidden'));
-            // hide left login button once logged in
             leftLoginButtons.forEach(btn => btn.classList.add('hidden'));
             userGreetings.forEach(greeting => {
                 greeting.textContent = user.username + (user.isAdmin ? ' (admin)' : '');
@@ -1311,7 +1262,6 @@ function renderAdminAgendamentos(){
             logoutBtns.forEach(btn => btn.classList.remove('hidden'));
 
             if (user.isAdmin) {
-                // Admin view: show admin links, hide public Loja/Agendamento
                 stockLinks.forEach(link => link.classList.remove('hidden'));
                 adminAgendamentosLinks.forEach(link => link.classList.remove('hidden'));
                 hotelLinks.forEach(link => link.classList.remove('hidden'));
@@ -1319,7 +1269,6 @@ function renderAdminAgendamentos(){
                 lojaLinks.forEach(l => l.classList.add('hidden'));
                 agendamentoLinks.forEach(l => l.classList.add('hidden'));
             } else {
-                // Regular user: hide admin links, ensure public links visible
                 stockLinks.forEach(link => link.classList.add('hidden'));
                 adminAgendamentosLinks.forEach(link => link.classList.add('hidden'));
                 hotelLinks.forEach(link => link.classList.add('hidden'));
@@ -1328,7 +1277,6 @@ function renderAdminAgendamentos(){
                 agendamentoLinks.forEach(l => l.classList.remove('hidden'));
             }
         } else {
-            // guest
             loginLinks.forEach(link => link.classList.remove('hidden'));
             cadastroLinks.forEach(link => link.classList.remove('hidden'));
             leftLoginButtons.forEach(btn => btn.classList.remove('hidden'));
@@ -1341,7 +1289,6 @@ function renderAdminAgendamentos(){
             adminAgendamentosLinks.forEach(link => link.classList.add('hidden'));
             leftLoginDropdowns.forEach(d => d.classList.add('hidden'));
             favoritosLinks.forEach(link => link.classList.add('hidden'));
-            // guest sees public nav
             lojaLinks.forEach(l => l.classList.remove('hidden'));
             agendamentoLinks.forEach(l => l.classList.remove('hidden'));
             hotelLinks.forEach(link => link.classList.add('hidden'));
@@ -1349,10 +1296,8 @@ function renderAdminAgendamentos(){
     try { renderVetNotifications(); } catch(e) {}
     }
 
-    // Toggle left dropdown menus: clicking the left login button toggles its sibling dropdown
     document.addEventListener('click', function(e){
         const target = e.target;
-        // if a left login button was clicked
         if (target && target.id && target.id.startsWith('leftLoginLink')) {
             const dropdownId = target.id.replace('leftLoginLink', 'leftLoginDropdown');
             const dropdown = document.getElementById(dropdownId);
@@ -1363,7 +1308,6 @@ function renderAdminAgendamentos(){
             return;
         }
 
-        // click outside: close all left dropdowns
         const isInsideLeft = target.closest && target.closest('.login-left');
         if (!isInsideLeft) {
             const leftLoginDropdowns = document.querySelectorAll('[id^="leftLoginDropdown"]');
@@ -1380,7 +1324,6 @@ function renderAdminAgendamentos(){
         updateMenu();
     });
 
-    // Render vet prescription notifications for the logged user (unread)
     function renderVetNotifications(){
         const container = document.getElementById('vetNotifications');
         if (!container) return;

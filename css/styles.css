@@ -1,15 +1,13 @@
-/* styles.css - Design inspirado na Petz */
 :root {
-  /* Nova Paleta 60/30/10 */
-  --primary: #00a8a9; /* 10% - Azul Pet */
+  --primary: #00a8a9;
   --primary-dark: #008a8b;
   --primary-light: #4cd4d5;
-  --secondary: #ffd700; /* 30% - Amarelo Ouro */
+  --secondary: #ffd700;
   --secondary-dark: #e6c200;
   --secondary-light: #ffe44d;
-  --accent: #fff9c4; /* Amarelo claro para detalhes */
-  --white: #ffffff; /* 60% - Branco */
-  --gray-bg: #fffef7; /* Branco com leve tom amarelo */
+  --accent: #fff9c4;
+  --white: #ffffff;
+  --gray-bg: #fffef7;
   --gray-light: #f5f5f5;
   --gray: #888888;
   --gray-dark: #555555;
@@ -23,7 +21,6 @@
   --shadow-hover: 0 8px 25px rgba(0, 0, 0, 0.12);
   --transition: all 0.3s ease;
 
-  /* Gradientes criativos */
   --gradient-primary: linear-gradient(
     135deg,
     var(--primary) 0%,
@@ -43,7 +40,6 @@
   --gradient-card: linear-gradient(135deg, var(--white) 0%, var(--accent) 100%);
 }
 
-/* Left login dropdown styling */
 .login-left {
   display: inline-block;
   margin-right: 12px;
@@ -70,7 +66,6 @@
 }
 .login-dropdown a:hover { background: var(--gray-light); }
 
-/* Melhorias visuais para opções de serviço em agendamento */
 .form-input#serviceType {
   padding: 12px;
   border-radius: 8px;
@@ -80,7 +75,6 @@
 .form-input#serviceType option { padding: 8px; }
 .message-warning { background: rgba(255, 152, 0, 0.12); color: var(--warning); padding: 10px; border-radius: 8px; border-left: 4px solid var(--warning); }
 
-/* Time input visual consistency */
 .form-input[type="time"] {
   padding: 10px 12px;
   border-radius: 8px;
@@ -324,7 +318,6 @@ nav a.active::after {
   gap: 10px;
 }
 
-/* Favorite star button styling */
 .favorite-btn {
   padding: 6px 8px;
   min-width: 36px;
