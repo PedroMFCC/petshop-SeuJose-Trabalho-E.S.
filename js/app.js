@@ -1034,196 +1034,178 @@
         });
     }
 
-    // Render user agendamentos (only active, hide concluded)
+    // Render user agendamentos (show unread vet prescriptions even if concluded)
     function renderAgendamentos(){
-        const list = document.getElementById('agendamentosList');
-        if (!list) return;
-        const user = getCurrentUser();
-        if (!user) {
-            list.innerHTML = '<p>Faça login para ver seus agendamentos.</p>';
-            return;
-        }
+	const list = document.getElementById('agendamentosList');
+	if (!list) return;
+	const user = getCurrentUser();
+	if (!user) {
+		list.innerHTML = '<div class="empty-agendamentos"><p>Faça login para ver seus agendamentos.</p></div>';
+		return;
+	}
 
-        // Show only non-concluded and non-cancelled agendamentos to the user
-        const agendamentos = getAgendamentos().filter(a => a.owner === user.username && a.status !== 'Concluído' && a.status !== 'Cancelado');
-        if (agendamentos.length === 0) {
-            list.innerHTML = '<p>Você não possui agendamentos ativos.</p>';
-            return;
-        }
+	const all = getAgendamentos();
 
-        list.innerHTML = '';
-        agendamentos.forEach(a => {
-            const card = document.createElement('div');
-            card.className = 'agendamento-card';
+	// First, show unread veterinarian prescriptions (regardless of appointment status)
+	const unreadPrescriptions = all.filter(a => a.owner === user.username && a.vetResponse && !a.vetRead);
 
-            let html = '';
-            html += `<div><strong>Serviço:</strong> ${a.service || ''}</div>`;
-            html += `<div><strong>Pet:</strong> ${a.petName || ''}</div>`;
-            html += `<div><strong>Data:</strong> ${a.date || ''} ${a.time || ''}</div>`;
-            if (a.entryTime) html += `<div><strong>Entrada:</strong> ${a.entryTime} <strong>Saída prevista:</strong> ${a.exitTime || ''}</div>`;
-            if (a.observations) html += `<div><em>${a.observations}</em></div>`;
+	let html = '';
+	if (unreadPrescriptions.length > 0) {
+		html += '<div class="agendamento-card"><h4>Prescrições Veterinárias</h4>';
+		unreadPrescriptions.forEach(a => {
+			html += '<div class="vet-response">';
+			html += `<p>${a.vetResponse}</p>`;
+			html += '<div style="text-align:right">';
+			html += `<button class="btn btn-outline btn-small" onclick="markVetRead(${a.id})">Marcar como lida</button>`;
+			html += '</div>';
+			html += '</div>';
+		});
+		html += '</div>';
+	}
 
-            // Only display the veterinarian message (if any). When user marks as read the message will be removed.
-            if (a.vetResponse) {
-                html += `<div class="vet-message"><strong>Mensagem do Veterinário:</strong><p>${a.vetResponse}</p>`;
-                html += `<div style="margin-top:6px;"><button class="btn btn-small" onclick="markVetRead(${a.id})">Marcar como lida</button></div></div>`;
-            }
+	// Then show active (non-concluded, non-cancelled) appointments
+	const agendamentos = all.filter(a => a.owner === user.username && a.status !== 'Concluído' && a.status !== 'Cancelado');
 
-            // Do NOT allow user to add client comments here (admin-only prescription flow)
+	if (agendamentos.length === 0 && unreadPrescriptions.length === 0) {
+		list.innerHTML = '<div class="empty-agendamentos"><p>Você não possui agendamentos ativos.</p></div>';
+		return;
+	}
 
-            // Cancel button
-            if (!a.status || a.status !== 'Cancelado') {
-                html += `<div style="margin-top:8px;"><button class="btn btn-danger btn-small" onclick="cancelarAgendamento(${a.id})">Cancelar</button></div>`;
-            }
+	if (agendamentos.length > 0) {
+		html += '';
+		agendamentos.forEach(a => {
+			html += '<div class="agendamento-card">';
+			html += `<h4>${a.service} <span class="status ${a.status === 'Pendente' ? 'status-pendente' : (a.status === 'Concluído' ? 'status-concluido' : '')}">${a.status}</span></h4>`;
+			html += `<p><strong>Pet:</strong> ${a.petName} <br /><strong>Data:</strong> ${a.date} ${a.time || a.entryTime || ''}</p>`;
+			if (a.observations) html += `<p><strong>Observações:</strong> ${a.observations}</p>`;
+			// If there is a vetResponse but it's already read, it shouldn't appear; unread ones were handled above
+			html += '<div class="admin-controls">';
+			html += `<button class="btn btn-outline btn-small" onclick="cancelarAgendamento(${a.id})">Cancelar</button>`;
+			html += '</div>';
+			html += '</div>';
+		});
+	}
 
-            card.innerHTML = html;
-            list.appendChild(card);
-        });
-    }
+	list.innerHTML = html;
+}
 
-    // Allow user to mark veterinarian message as read: remove the message from the agendamento and update notifications
-    window.markVetRead = function(agendamentoId){
-        const ags = getAgendamentos();
-        const idx = ags.findIndex(a => a.id === agendamentoId);
-        if (idx === -1) return;
-        // Remove the vetResponse so it no longer shows to the user
-        ags[idx].vetResponse = null;
-        ags[idx].vetRead = true;
-        setAgendamentos(ags);
-        // Re-render user list and notifications
-        try { renderAgendamentos(); } catch(e){}
-        try { renderVetNotifications(); } catch(e){}
-    };
+// Allow user to mark veterinarian message as read: remove the message from the agendamento and update notifications
+window.markVetRead = function(agendamentoId){
+	const ags = getAgendamentos();
+	const idx = ags.findIndex(a => a.id === agendamentoId);
+	if (idx === -1) return;
+	// Clear the vetResponse and mark as read so notification disappears
+	ags[idx].vetResponse = null;
+	ags[idx].vetRead = true;
+	setAgendamentos(ags);
+	try { renderAgendamentos(); } catch(e){}
+	try { renderVetNotifications(); } catch(e){}
+};
 
-    // Admin: mark an agendamento as concluído (moves it out of the main admin list into the Concluídos sub-tab)
-    window.markAgendamentoConcluido = function(agendamentoId){
-        const ags = getAgendamentos();
-        const idx = ags.findIndex(a => a.id === agendamentoId);
-        if (idx === -1) return;
-        ags[idx].status = 'Concluído';
-        // Add to concluidos log
-        const log = getConcluidosLog();
-        const entry = Object.assign({}, ags[idx]);
-        entry.concludedAt = new Date().toISOString();
-        log.push(entry);
-        setConcluidosLog(log);
-        setAgendamentos(ags);
-        // Re-render admin and user views
-        try { renderAdminAgendamentos(); } catch(e){}
-        try { renderAgendamentos(); } catch(e){}
-    };
+// Admin: mark an agendamento as concluído (moves it out of the main admin list into the Concluídos log)
+window.markAgendamentoConcluido = function(agendamentoId){
+	const ags = getAgendamentos();
+	const idx = ags.findIndex(a => a.id === agendamentoId);
+	if (idx === -1) return;
+	// set status
+	ags[idx].status = 'Concluído';
+	// Add to concluidos log (store a copy)
+	const log = getConcluidosLog();
+	const entry = Object.assign({}, ags[idx]);
+	entry.concludedAt = new Date().toISOString();
+	log.push(entry);
+	setConcluidosLog(log);
+	setAgendamentos(ags);
+	// Re-render admin and user views
+	try { renderAdminAgendamentos(); } catch(e){}
+	try { renderAgendamentos(); } catch(e){}
+	try { renderVetNotifications(); } catch(e){}
+};
 
-    // Render admin agendamentos with two tabs: Ativos and Concluídos
-    function renderAdminAgendamentos(){
-        const container = document.getElementById('adminAgendamentosList');
-        if (!container) return;
-        const ags = getAgendamentos();
-        // Show all agendamentos to admin regardless of owner
-        const active = ags.filter(a => a.status !== 'Concluído');
-        const completed = getConcluidosLog();
+// Render admin agendamentos with two tabs: Ativos and Concluídos (no option to re-open concluded items)
+function renderAdminAgendamentos(){
+	const container = document.getElementById('adminAgendamentosList');
+	if (!container) return;
+	const ags = getAgendamentos();
+	// Show all agendamentos to admin regardless of owner
+	const active = ags.filter(a => a.status !== 'Concluído');
+	const completed = getConcluidosLog();
 
-        container.innerHTML = '';
+	container.innerHTML = '';
 
-        // Tabs header
-        const tabs = document.createElement('div');
-        tabs.className = 'admin-tabs';
-        tabs.innerHTML = `<button id="tabActive" class="btn btn-outline btn-small">Ativos (${active.length})</button> <button id="tabCompleted" class="btn btn-outline btn-small">Concluídos (${completed.length})</button>`;
-        container.appendChild(tabs);
+	// Tabs header
+	const tabs = document.createElement('div');
+	tabs.className = 'admin-tabs';
+	tabs.innerHTML = `<button id="tabActive" class="btn btn-outline btn-small">Ativos (${active.length})</button> <button id="tabCompleted" class="btn btn-outline btn-small">Concluídos (${completed.length})</button>`;
+	container.appendChild(tabs);
 
-        // Active list
-        const activeDiv = document.createElement('div');
-        activeDiv.id = 'adminActiveList';
-        activeDiv.style.marginTop = '12px';
+	// Active list
+	const activeDiv = document.createElement('div');
+	activeDiv.id = 'adminActiveList';
+	activeDiv.style.marginTop = '12px';
 
-        if (active.length === 0) {
-            activeDiv.innerHTML = '<p>Sem agendamentos ativos.</p>';
-        } else {
-            active.forEach(a => {
-                const card = document.createElement('div');
-                card.className = 'admin-agendamento-card';
-                let html = '';
-                html += `<div><strong>ID:</strong> ${a.id} - <strong>Serviço:</strong> ${a.service || ''}</div>`;
-                html += `<div><strong>Pet:</strong> ${a.petName || ''} <strong>Proprietário:</strong> ${a.owner || ''}</div>`;
-                html += `<div><strong>Data:</strong> ${a.date || ''} ${a.time || ''}</div>`;
-                if (a.clientComment) html += `<div><em>Comentário do cliente:</em><p>${a.clientComment}</p></div>`;
+	if (active.length === 0) {
+		activeDiv.innerHTML = '<div class="empty-agendamentos"><p>Nenhum agendamento ativo.</p></div>';
+	} else {
+		let html = '';
+		active.forEach(a => {
+			html += '<div class="agendamento-card">';
+			html += `<h4>${a.service} <small>(${a.owner})</small></h4>`;
+			html += `<p><strong>Pet:</strong> ${a.petName} <br /><strong>Data:</strong> ${a.date} ${a.time || a.entryTime || ''}</p>`;
+			if (a.observations) html += `<p><strong>Observações:</strong> ${a.observations}</p>`;
+			// show client comment if present
+			if (a.clientComment) html += `<p><strong>Comentário do cliente:</strong> ${a.clientComment}</p>`;
+			// Vet response textarea and controls
+			html += `<div style="margin-top:8px"><textarea id="vetResponse-${a.id}" rows="3" class="form-input" placeholder="Escreva a prescrição/veterinária aqui..."></textarea></div>`;
+			html += '<div class="admin-controls">';
+			html += `<button class="btn btn-primary btn-small" onclick="sendVetPrescription(${a.id})">Enviar Prescrição</button>`;
+			html += `<button class="btn btn-outline btn-small" onclick="markAgendamentoConcluido(${a.id})">Marcar como Concluído</button>`;
+			html += `<button class="btn btn-remove btn-small" onclick="cancelarAgendamentoAdmin(${a.id})">Excluir</button>`;
+			html += '</div>';
+			html += '</div>';
+		});
+		activeDiv.innerHTML = html;
+	}
 
-                // Only show prescription textarea for services that accept veterinary prescriptions
-                const prescServices = ['Consulta Veterinária','Vacinação'];
-                if (prescServices.includes(a.service)){
-                    html += `<div style="margin-top:8px;"><textarea id="vetResponse-${a.id}" rows="3" class="form-input" placeholder="Escreva a prescrição / retorno ao cliente">${a.vetResponse || ''}</textarea>`;
-                    html += `<div style="margin-top:6px;"><button class="btn btn-primary btn-small" onclick="sendVetPrescription(${a.id})">Enviar Prescrição</button> <button class="btn btn-outline btn-small" onclick="markAgendamentoConcluido(${a.id})">Marcar como Concluído</button></div></div>`;
-                } else {
-                    // No prescription allowed for this service; still allow marking concluded
-                    html += `<div style="margin-top:8px;"><button class="btn btn-outline btn-small" onclick="markAgendamentoConcluido(${a.id})">Marcar como Concluído</button></div>`;
-                }
+	// Completed list (from log) - read-only, no reopen button
+	const completedDiv = document.createElement('div');
+	completedDiv.id = 'adminCompletedList';
+	completedDiv.style.display = 'none';
+	completedDiv.style.marginTop = '12px';
 
-                // Cancel button
-                html += `<div style="margin-top:8px;"><button class="btn btn-danger btn-small" onclick="cancelarAgendamentoAdmin(${a.id})">Excluir/Cancelar</button></div>`;
+	if (completed.length === 0) {
+		completedDiv.innerHTML = '<div class="empty-agendamentos"><p>Nenhum agendamento concluído.</p></div>';
+	} else {
+		let html = '';
+		completed.forEach(c => {
+			html += '<div class="agendamento-card">';
+			html += `<h4>${c.service} <small>(${c.owner})</small></h4>`;
+			html += `<p><strong>Pet:</strong> ${c.petName} <br /><strong>Data:</strong> ${c.date} ${c.time || c.entryTime || ''}</p>`;
+			if (c.observations) html += `<p><strong>Observações:</strong> ${c.observations}</p>`;
+			if (c.vetResponse) html += `<div class="vet-response"><p>${c.vetResponse}</p></div>`;
+			html += `<p class="status status-concluido">Concluído em: ${new Date(c.concludedAt).toLocaleString()}</p>`;
+			html += '</div>';
+		});
+		completedDiv.innerHTML = html;
+	}
 
-                card.innerHTML = html;
-                activeDiv.appendChild(card);
-            });
-        }
+	container.appendChild(activeDiv);
+	container.appendChild(completedDiv);
 
-        // Completed list (from log)
-        const completedDiv = document.createElement('div');
-        completedDiv.id = 'adminCompletedList';
-        completedDiv.style.display = 'none';
-        completedDiv.style.marginTop = '12px';
+	// Tab switching handlers
+	const tabActive = document.getElementById('tabActive');
+	const tabCompleted = document.getElementById('tabCompleted');
+	tabActive.addEventListener('click', () => {
+		document.getElementById('adminActiveList').style.display = '';
+		document.getElementById('adminCompletedList').style.display = 'none';
+	});
+	tabCompleted.addEventListener('click', () => {
+		document.getElementById('adminActiveList').style.display = 'none';
+		document.getElementById('adminCompletedList').style.display = '';
+	});
+}
 
-        if (completed.length === 0) {
-            completedDiv.innerHTML = '<p>Sem agendamentos concluídos.</p>';
-        } else {
-            completed.forEach(a => {
-                const card = document.createElement('div');
-                card.className = 'admin-agendamento-card completed';
-                let html = '';
-                html += `<div><strong>ID:</strong> ${a.id} - <strong>Serviço:</strong> ${a.service || ''}</div>`;
-                html += `<div><strong>Pet:</strong> ${a.petName || ''} <strong>Proprietário:</strong> ${a.owner || ''}</div>`;
-                html += `<div><strong>Data:</strong> ${a.date || ''} ${a.time || ''}</div>`;
-                if (a.vetResponse) html += `<div style="margin-top:6px;"><strong>Prescrição enviada:</strong><p>${a.vetResponse}</p></div>`;
-                if (a.clientComment) html += `<div style="margin-top:6px;"><em>Comentário do cliente:</em><p>${a.clientComment}</p></div>`;
-                html += `<div style="margin-top:8px;"><button class="btn btn-outline btn-small" onclick="(function(){ let ag=getAgendamentos(); let i=ag.findIndex(x=>x.id===${a.id}); if(i>-1){ag[i].status='Agendado'; setAgendamentos(ag); renderAdminAgendamentos();}})()">Reabrir</button></div>`;
-                card.innerHTML = html;
-                completedDiv.appendChild(card);
-            });
-        }
-
-        container.appendChild(activeDiv);
-        container.appendChild(completedDiv);
-
-        // Tab switching handlers
-        const tabActive = document.getElementById('tabActive');
-        const tabCompleted = document.getElementById('tabCompleted');
-        tabActive.addEventListener('click', () => { activeDiv.style.display = ''; completedDiv.style.display = 'none'; });
-        tabCompleted.addEventListener('click', () => { activeDiv.style.display = 'none'; completedDiv.style.display = ''; });
-    }
-
-    // Prevent users from saving client comments here (only admin can add prescriptions via admin panel)
-    window.saveClientComment = function(agendamentoId){
-        const user = getCurrentUser();
-        if (!user || !user.isAdmin){
-            // silently ignore or show brief feedback
-            return;
-        }
-        // Admin shouldn't use this path for prescriptions; admin uses sendVetPrescription instead.
-    };
-
-    window.cancelarAgendamento = function(agendamentoId){
-        if (!confirm('Tem certeza que deseja cancelar este agendamento?')) return;
-        
-        let agendamentos = getAgendamentos();
-        agendamentos = agendamentos.filter(a => a.id !== agendamentoId);
-        setAgendamentos(agendamentos);
-        renderAgendamentos();
-        
-        // If admin cancels, also update the admin view
-        if (typeof renderAdminAgendamentos === 'function') {
-            try { renderAdminAgendamentos(); } catch(e) {}
-        }
-    };
-
-    // ===============================================
+// ===============================================
     // FUNÇÕES DO PAINEL ADMIN DE AGENDAMENTOS
     // ===============================================
 
